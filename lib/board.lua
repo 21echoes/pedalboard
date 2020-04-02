@@ -5,6 +5,7 @@ local UI = require "ui"
 local VolumePedal = include("lib/pedals/volume")
 
 local pedal_classes = {VolumePedal}
+local MAX_SLOTS = 4
 
 local Board = {}
 Board.__index = Board
@@ -103,11 +104,14 @@ end
 
 function Board:_setup_tabs()
   tab_names = {}
+  use_short_names = self:_use_short_names()
   for i, pedal in ipairs(self.pedals) do
-    table.insert(tab_names, pedal.name)
+    table.insert(tab_names, pedal.name(use_short_names))
   end
-  -- TODO: only add "New?" if below max
-  table.insert(tab_names, "New?")
+  -- Only add the New slot if we're not yet at the max
+  if #self.pedals ~= MAX_SLOTS then
+    table.insert(tab_names, "New?")
+  end
   self.tabs = UI.Tabs.new(1, tab_names)
 end
 
@@ -123,16 +127,18 @@ function Board:_render_tab_content(i)
         screen.text_center(self:_name_of_pending_pedal())
       else
         -- Render "Add {name of the new pedal}" as centered text
+        use_short_names = self:_use_short_names()
         screen.move(center_x, center_y - 4)
-        screen.text_center("Add")
+        screen.text_center(use_short_names and "+" or "Add")
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
       end
       return
     elseif self:_slot_has_pending_switch(i) then
       -- Render "Switch to {name of the new pedal}" as centered text
+      use_short_names = self:_use_short_names()
       screen.move(center_x, center_y - 4)
-      screen.text_center("Switch to")
+      screen.text_center(use_short_names and "->" or "Switch to")
       screen.move(center_x, center_y + 4)
       screen.text_center(self:_name_of_pending_pedal())
       return
@@ -166,14 +172,18 @@ end
 
 function Board:_name_of_pending_pedal()
   pending_pedal_class = self:_pending_pedal_class()
+  use_short_names = self:_use_short_names()
   if pending_pedal_class == nil then
-    return "No Selection"
+    return use_short_names and " " or "No Selection"
   end
-  return pending_pedal_class.name
+  return pending_pedal_class.name(use_short_names)
 end
 
 function Board:_is_new_slot(i)
-  -- TODO: return false if max slots are already full
+  -- None of the slots are the New slot if we're already at the maximum number of slots
+  if #self.pedals == MAX_SLOTS then
+    return false
+  end
   return i == #self.tabs.titles
 end
 
@@ -190,6 +200,10 @@ function Board:_set_pending_pedal_class_to_match_tab(i)
       break
     end
   end
+end
+
+function Board:_use_short_names()
+  return #self.pedals >= 2
 end
 
 return Board

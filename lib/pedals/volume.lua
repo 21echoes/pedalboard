@@ -5,7 +5,6 @@ local UI = require "ui"
 
 local VolumePedal = {}
 VolumePedal.__index = VolumePedal
-VolumePedal.name = "Volume"
 
 function VolumePedal.new()
   local i = {}
@@ -23,6 +22,10 @@ function VolumePedal.new()
   i:_update_active_dials()
 
   return i
+end
+
+function VolumePedal.name(short)
+  return short and "VOL" or "Volume"
 end
 
 function VolumePedal:enter()
@@ -63,7 +66,7 @@ function VolumePedal:redraw()
     end
   end
   screen.move(64, 64)
-  screen.text_center(self.name)
+  screen.text_center(self.name())
 end
 
 
