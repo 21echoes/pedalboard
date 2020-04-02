@@ -56,6 +56,7 @@ function enc(n, delta)
   if n == 1 then
     -- E1 changes page
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
+    current_page():enter()
     screen_dirty = true
   else
     -- Other encoders are routed to the current page's class

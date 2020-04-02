@@ -14,10 +14,16 @@ function Board.new()
   setmetatable(i, Board)
 
   i.pedals = {}
-  i.pending_pedal_class_index = 0
+  i._pending_pedal_class_index = 0
   i:_setup_tabs()
 
   return i
+end
+
+function Board:enter()
+  -- Called when the page is scrolled to
+  self.tabs:set_index(1)
+  self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
 end
 
 function Board:key(n, z, set_page_index, add_page, swap_page)
@@ -72,16 +78,16 @@ function Board:enc(n, delta)
   if n == 2 then
     -- Change which pedal slot is focused
     self.tabs:set_index_delta(util.clamp(delta, -1, 1), false)
-    -- TODO: set self.pending_pedal_class_index to the index of the pedal for the current slot, or 0 if on the New slot
+    self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
     return true
   elseif n == 3 then
     -- Change the type of pedal we're considering adding or switching to
     if self:_pending_pedal_class() == nil then
-      self.pending_pedal_class_index = 0
+      self._pending_pedal_class_index = 0
     end
     -- Clamp min as 1 if on active slot, or 0 if on New slot
     minimum = (not self:_is_new_slot(self.tabs.index)) and 1 or 0
-    self.pending_pedal_class_index = util.clamp(self.pending_pedal_class_index + delta, minimum, #pedal_classes)
+    self._pending_pedal_class_index = util.clamp(self._pending_pedal_class_index + delta, minimum, #pedal_classes)
     return true
   end
 
@@ -144,17 +150,18 @@ function Board:_get_offset_and_width(i)
 end
 
 function Board:_pending_pedal_class()
-  if self.pending_pedal_class_index == nil or self.pending_pedal_class_index == 0 then
+  if self._pending_pedal_class_index == nil or self._pending_pedal_class_index == 0 then
     return nil
   end
-  return pedal_classes[self.pending_pedal_class_index]
+  return pedal_classes[self._pending_pedal_class_index]
 end
 
 function Board:_slot_has_pending_switch(i)
+  pending_pedal_class = self:_pending_pedal_class()
   if self:_pending_pedal_class() == nil then
     return false
   end
-  return self:_name_of_pending_pedal() ~= self.pedals[i].name
+  return pending_pedal_class.__index ~= self.pedals[i].__index
 end
 
 function Board:_name_of_pending_pedal()
@@ -168,6 +175,21 @@ end
 function Board:_is_new_slot(i)
   -- TODO: return false if max slots are already full
   return i == #self.tabs.titles
+end
+
+function Board:_set_pending_pedal_class_to_match_tab(i)
+  if self:_is_new_slot(i) then
+    self._pending_pedal_class_index = 1
+    return
+  end
+
+  pedal_class_at_i = self.pedals[i].__index
+  for i, pedal_class in ipairs(pedal_classes) do
+    if pedal_class_at_i == pedal_class then
+      self._pending_pedal_class_index = i
+      break
+    end
+  end
 end
 
 return Board

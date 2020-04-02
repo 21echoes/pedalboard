@@ -25,6 +25,10 @@ function VolumePedal.new()
   return i
 end
 
+function VolumePedal:enter()
+  -- Called when the page is scrolled to
+end
+
 function VolumePedal:key(n, z)
   -- Key-up currently has no meaning
   if z ~= 1 then
