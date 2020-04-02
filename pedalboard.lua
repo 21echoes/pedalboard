@@ -19,7 +19,6 @@
 
 local UI = require "ui"
 local Board = include("lib/board")
-local VolumePedal = include("lib/pedals/volume")
 
 -- Pages UI management
 local pages
@@ -37,7 +36,7 @@ function init()
   screen.line_width(1)
 
   -- Set up pages
-  pages_table = {Board.new(), VolumePedal.new()}
+  pages_table = {Board.new()}
   pages = UI.Pages.new(1, #pages_table)
 
   -- Render loop
@@ -50,7 +49,7 @@ end
 function key(n, z)
   -- All key presses are routed to the current page's class.
   -- We also provide a callback so that the current page can change the page
-  screen_dirty = current_page():key(n, z, set_page)
+  screen_dirty = current_page():key(n, z, set_page_index, add_page, swap_page)
 end
 
 function enc(n, delta)
@@ -87,7 +86,18 @@ function current_page()
   return pages_table[pages.index]
 end
 
-function set_page(new_page_index)
+function set_page_index(new_page_index)
   pages:set_index(new_page_index)
+  screen_dirty = true
+end
+
+function add_page(page_instance)
+  table.insert(pages_table, page_instance)
+  pages = UI.Pages.new(1, #pages_table)
+  screen_dirty = true
+end
+
+function swap_page(index, page_instance)
+  pages_table[index] = page_instance
   screen_dirty = true
 end

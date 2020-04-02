@@ -5,6 +5,7 @@ local UI = require "ui"
 
 local VolumePedal = {}
 VolumePedal.__index = VolumePedal
+VolumePedal.name = "Volume"
 
 function VolumePedal.new()
   local i = {}
