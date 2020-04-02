@@ -18,20 +18,17 @@
 -- v0.1 @21echoes
 
 local UI = require "ui"
+local Board = include("lib/board")
+local VolumePedal = include("lib/pedals/volume")
 
--- High level UI management
+-- Pages UI management
 local pages
-local tabs
+local pages_table
 
 -- Variables for the render loop
 local SCREEN_FRAMERATE = 15
 local screen_refresh_metro
 local screen_dirty = true
-
--- UI testing
--- TODO: remove
-local dial_l
-local dial_r
 
 function init()
   -- Setup our overall rendering style
@@ -39,63 +36,58 @@ function init()
   screen.aa(0)
   screen.line_width(1)
 
-  -- Set up pages and tabs
-  pages = UI.Pages.new(1, 3)
-  tabs = UI.Tabs.new(1, {"1", "2", "3", "4"})
-
-  -- x, y, size, value, min_value, max_value, rounding, start_value, markers, units, title
-  dial_l = UI.Dial.new(9, 19, 22, 25, 0, 100, 1)
-  dial_r = UI.Dial.new(34.5, 34, 22, 0.3, -1, 1, 0.01, 0, {0})
+  -- Set up pages
+  pages_table = {Board.new(), VolumePedal.new()}
+  pages = UI.Pages.new(1, #pages_table)
 
   -- Render loop
   screen_refresh_metro = metro.init()
-  screen_refresh_metro.event = function()
-    if screen_dirty then
-      screen_dirty = false
-      redraw()
-    end
-  end
+  screen_refresh_metro.event = render_loop
   screen_refresh_metro:start(1 / SCREEN_FRAMERATE)
 end
 
 -- Interactions
 function key(n, z)
-  print('key', n, z)
-  if z ~= 1 then
-    return
-  end
-
-  if n == 2 then
-    tabs:set_index_delta(-1, false)
-  elseif n == 3 then
-    tabs:set_index_delta(1, false)
-  end
-
-  redraw()
+  -- All key presses are routed to the current page's class.
+  -- We also provide a callback so that the current page can change the page
+  screen_dirty = current_page():key(n, z, set_page)
 end
 
 function enc(n, delta)
-  print('enc', n, delta)
-
   if n == 1 then
+    -- E1 changes page
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
-  elseif n == 2 then
-    dial_l:set_value_delta(delta)
-  elseif n == 3 then
-    dial_r:set_value_delta(delta)
+    screen_dirty = true
+  else
+    -- Other encoders are routed to the current page's class
+    screen_dirty = current_page():enc(n, delta)
   end
-
-  redraw()
 end
 
 -- Render
+function render_loop()
+  if screen_dirty then
+    screen_dirty = false
+    redraw()
+  end
+end
+
 function redraw()
   screen.clear()
 
+  -- Redraw both our content and the current page's content
   pages:redraw()
-  tabs:redraw()
-  dial_l:redraw()
-  dial_r:redraw()
+  current_page():redraw()
 
   screen.update()
+end
+
+-- Utils
+function current_page()
+  return pages_table[pages.index]
+end
+
+function set_page(new_page_index)
+  pages:set_index(new_page_index)
+  screen_dirty = true
 end
