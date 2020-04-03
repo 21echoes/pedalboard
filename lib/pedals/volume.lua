@@ -25,6 +25,9 @@ function VolumePedal.new()
   i.dials = {{i.dial_bypass, i.dial_mix}, {i.dial_in_gain, i.dial_out_gain}}
   i:_update_active_dials()
 
+  i.tab_bypass_label = ""
+  i.tab_mix_dial = UI.Dial.new(0, 12, 22, 50, 0, 100, 1)
+
   i._param_id_to_dials = {}
   for layer_index, layer in ipairs(i._param_ids) do
     for index, param_id in ipairs(layer) do
@@ -131,13 +134,35 @@ function VolumePedal:redraw()
   screen.text_center(self.name())
 end
 
+function VolumePedal:render_as_tab(offset, width, is_active)
+  center_x = offset + (width / 2)
+  tab_mix_dial_value = self.tab_mix_dial.value
+  self.tab_mix_dial = UI.Dial.new(center_x - 11, 16, 22, tab_mix_dial_value, 0, 100, 1)
+  self.tab_mix_dial.active = is_active
+  self.tab_mix_dial:redraw()
+  if self.tab_bypass_label == "ON" then
+    screen.level(is_active and 15 or 6)
+  else
+    screen.level(is_active and 4 or 1)
+  end
+  screen.move(center_x, 56)
+  screen.text_center(self.tab_bypass_label)
+  screen.level(15)
+  -- Prevent a stray line being drawn
+  screen.stroke()
+end
+
 function VolumePedal:_set_value_from_param_value(param_id, value)
   coerced_value = value
   if param_id == "volume_bypass" then
     -- The options are 1-indexed, but the bypass control expects 0 or 1
     coerced_value = value - 1
+    self.tab_bypass_label = value == 1 and "ON" or "OFF"
+  elseif param_id == "volume_mix" then
+    self.tab_mix_dial:set_value(coerced_value)
   end
   self._param_id_to_dials[param_id]:set_value(coerced_value)
+
   -- TODO: change engine settings
 end
 

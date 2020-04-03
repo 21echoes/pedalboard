@@ -219,8 +219,14 @@ function Board:_render_tab_content(i)
       return
     end
   end
-  -- TODO: Ask pedal instance to render as tab with width and offset
-  -- self.pedals[i]:render_as_tab(offset, width)
+
+  -- The New slot renders nothing if not highlighted
+  if self:_is_new_slot(i) then
+    return
+  end
+
+  -- Defer to the pedal instance to render as tab
+  self.pedals[i]:render_as_tab(offset, width, i == self.tabs.index)
 end
 
 function Board:_get_offset_and_width(i)
