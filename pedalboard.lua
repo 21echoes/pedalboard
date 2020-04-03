@@ -35,6 +35,11 @@ function init()
   screen.aa(0)
   screen.line_width(1)
 
+  -- Set up params (delegate to the Board class)
+  params:add_separator("Pedalboard")
+  Board.add_params()
+  params:bang()
+
   -- Set up pages
   pages_table = {Board.new()}
   pages = UI.Pages.new(1, #pages_table)
@@ -48,8 +53,8 @@ end
 -- Interactions
 function key(n, z)
   -- All key presses are routed to the current page's class.
-  -- We also provide a callback so that the current page can change the page
-  screen_dirty = current_page():key(n, z, set_page_index, add_page, swap_page)
+  -- We also provide callbacks for children modifying our state
+  screen_dirty = current_page():key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
 end
 
 function enc(n, delta)
@@ -101,4 +106,8 @@ end
 function swap_page(index, page_instance)
   pages_table[index] = page_instance
   screen_dirty = true
+end
+
+function mark_screen_dirty(is_screen_dirty)
+  screen_dirty = is_screen_dirty
 end
