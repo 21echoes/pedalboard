@@ -9,6 +9,7 @@ CONTROL_SPEC_GAIN = ControlSpec.new(-60, 12, "lin", 0.5, 0, "dB")
 
 local VolumePedal = {}
 VolumePedal.__index = VolumePedal
+VolumePedal.id = "volume"
 
 function VolumePedal.new()
   local i = {}
@@ -18,6 +19,7 @@ function VolumePedal.new()
   i.tabs_table = {"Bypass & Mix", "In & Out Gains"}
   i.tabs = UI.Tabs.new(1, i.tabs_table)
 
+  -- TODO: consider making bypass always an on/off label
   i.dial_bypass = UI.Dial.new(9, 12, 22, 0, 0, 1, 1)
   i.dial_mix = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
   i.dial_in_gain = UI.Dial.new(72, 12, 22, 0, -60, 12, 1, 0, {0})
@@ -48,7 +50,7 @@ end
 function VolumePedal.add_params()
   params:add_group(VolumePedal.name(), 4)
 
-  id_prefix = "volume"
+  id_prefix = VolumePedal.id
 
   bypass_id = id_prefix .. "_bypass"
   params:add({
@@ -163,7 +165,16 @@ function VolumePedal:_set_value_from_param_value(param_id, value)
   end
   self._param_id_to_dials[param_id]:set_value(coerced_value)
 
-  -- TODO: change engine settings
+  -- Tell the engine what you did.
+  if param_id == "volume_bypass" then
+    engine.volume_bypass(coerced_value)
+  elseif param_id == "volume_mix" then
+    engine.volume_mix(coerced_value / 100.0)
+  elseif param_id == "volume_in_gain" then
+    engine.volume_in_gain(util.dbamp(coerced_value))
+  elseif param_id == "volume_out_gain" then
+    engine.volume_out_gain(util.dbamp(coerced_value))
+  end
 end
 
 function VolumePedal:_update_active_dials()

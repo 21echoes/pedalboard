@@ -3,9 +3,10 @@
 
 local UI = require "ui"
 local tabutil = require "tabutil"
-local VolumePedal = include("lib/pedals/volume")
+local VolumePedal = include("lib/ui/pedals/volume")
+local ReverbPedal = include("lib/ui/pedals/reverb")
 
-local pedal_classes = {VolumePedal}
+local pedal_classes = {VolumePedal, ReverbPedal}
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "EMPTY_PEDAL"
 local pedal_names = {EMPTY_PEDAL}
@@ -128,7 +129,7 @@ function Board:enc(n, delta)
     -- TODO: allow selecting EMPTY_PEDAL to remove the pedal
     minimum = (not self:_is_new_slot(self.tabs.index)) and 1 or 0
     -- We don't want to allow selection of a pedal already in use in another slot
-    -- (primarily due to technical restrictions in how params and SC engines work)
+    -- (primarily due to technical restrictions in how params work)
     -- So we make list of pedal classes in the same order as master list, but removing classes in use by other tabs
     indexes_of_active_pedals = {}
     current_pedal_class_index_at_current_tab = 0
@@ -312,6 +313,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
     pedal_instance = pedal_class.new()
+    engine.add_pedal(pedal_instance.id)
     table.insert(self.pedals, pedal_instance)
     self:_setup_tabs()
     self._add_page(pedal_instance)
@@ -322,6 +324,9 @@ function Board:_set_pedal_by_index(slot, name_index)
       return
     end
     pedal_instance = pedal_class.new()
+    -- The engine is zero-indexed
+    engine_index = slot - 1
+    engine.swap_pedal_at_index(engine_index, pedal_instance.id)
     self.pedals[slot] = pedal_instance
     self:_setup_tabs()
     self._swap_page(page_index, pedal_instance)

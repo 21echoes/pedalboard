@@ -17,8 +17,9 @@
 --
 -- v0.1 @21echoes
 
+engine.name = "Pedalboard"
 local UI = require "ui"
-local Board = include("lib/board")
+local Board = include("lib/ui/board")
 
 -- Pages UI management
 local pages
@@ -39,6 +40,11 @@ function init()
   params:add_separator("Pedalboard")
   Board.add_params()
   params:bang()
+
+  -- Turn off the built-in monitoring, reverb, etc.
+  audio.level_monitor(0.0)
+  audio.rev_off()
+  audio.comp_off()
 
   -- Set up pages
   pages_table = {Board.new()}
