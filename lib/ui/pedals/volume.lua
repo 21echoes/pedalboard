@@ -154,6 +154,16 @@ function VolumePedal:render_as_tab(offset, width, is_active)
   screen.stroke()
 end
 
+function VolumePedal:toggle_bypass()
+  bypass_param_id = self.id .. "_bypass"
+  is_currently_bypassed = params:get(bypass_param_id) == 2
+  params:set(bypass_param_id, is_currently_bypassed and 1 or 2)
+end
+
+function VolumePedal:scroll_mix(delta)
+  params:delta(self.id .. "_mix", delta)
+end
+
 function VolumePedal:_set_value_from_param_value(param_id, value)
   coerced_value = value
   if param_id == "volume_bypass" then

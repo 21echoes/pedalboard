@@ -13,6 +13,7 @@ local pedal_names = {EMPTY_PEDAL}
 for i, pedal_class in ipairs(pedal_classes) do
   table.insert(pedal_names, pedal_class.name())
 end
+local CLICK_DURATION = 0.7
 
 local Board = {}
 Board.__index = Board
@@ -23,6 +24,8 @@ function Board.new()
 
   i.pedals = {}
   i._pending_pedal_class_index = 0
+  i._alt_key_down_time = nil
+  i._alt_action_taken = false
   i:_setup_tabs()
   i:_reset_callbacks()
   i:_add_param_actions()
@@ -63,13 +66,23 @@ function Board:enter()
 end
 
 function Board:key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
-  -- Key-up currently has no meaning
-  if z ~= 1 then
-    return false
-  end
-
   if n == 2 then
-    -- K2 means nothing on the New slot
+    -- Key down on K2 enables alt mode
+    if z == 1 then
+      self._alt_key_down_time = util.time()
+      return false
+    end
+
+    -- Key up on K2 after an alt action was taken, or even just after a longer held time, counts as nothing
+    key_down_duration = util.time() - self._alt_key_down_time
+    self._alt_key_down_time = nil
+    if self._alt_action_taken or key_down_duration > CLICK_DURATION then
+      self._alt_action_taken = false
+      return
+    end
+
+    -- Otherwise we count this key-up as a click on K2
+    -- K2 click means nothing on the New slot
     if self:_is_new_slot(self.tabs.index) then
       return false
     end
@@ -77,6 +90,22 @@ function Board:key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
     set_page_index(self.tabs.index + 1)
     return true
   elseif n == 3 then
+    -- Key-up on K3 has no meaning
+    if z == 0 then
+      return false
+    end
+
+    -- Alt+K3 means toggle bypass on current pedal
+    if self:_is_alt_mode() then
+      if self:_is_new_slot(self.tabs.index) then
+        -- No bypass to toggle on the New slot
+        return false
+      end
+      self.pedals[self.tabs.index]:toggle_bypass()
+      self._alt_action_taken = true
+      return true
+    end
+
     -- No pedal swap is pending
     if self:_pending_pedal_class() == nil then
       return false
@@ -121,6 +150,17 @@ function Board:enc(n, delta)
     self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
     return true
   elseif n == 3 then
+    -- Alt+E3 changes wet/dry
+    if self:_is_alt_mode() then
+      if self:_is_new_slot(self.tabs.index) then
+        -- No wet/dry to change on the New slot
+        return false
+      end
+      self.pedals[self.tabs.index]:scroll_mix(delta)
+      self._alt_action_taken = true
+      return true
+    end
+
     -- Change the type of pedal we're considering adding or switching to
     if self:_pending_pedal_class() == nil then
       self._pending_pedal_class_index = 0
@@ -334,6 +374,10 @@ function Board:_set_pedal_by_index(slot, name_index)
   self._set_page_index(page_index)
   self._mark_screen_dirty(true)
   self:_reset_callbacks()
+end
+
+function Board:_is_alt_mode()
+  return self._alt_key_down_time ~= nil
 end
 
 return Board
