@@ -111,7 +111,7 @@ function VolumePedal:key(n, z)
   elseif n == 3 then
     direction = 1
   end
-  self.tabs:set_index_delta(direction, false)
+  self.tabs:set_index_delta(direction, true)
   self:_update_active_dials()
 
   return true
