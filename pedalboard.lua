@@ -5,7 +5,7 @@
 -- Main Page: The Board
 -- E2 changes focused slot
 -- E3 changes pedal
--- E3 doesnt take effect til K3
+-- E3 doesn't take effect til K3
 -- K2 jumps to pedal page
 -- K2 + E2 re-orders pedals
 -- K2 + E3 changes wet/dry
@@ -42,12 +42,19 @@ function init()
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.
+  -- TODO: is this good behavior? How do we put the user back where they were before when they leave?
   audio.level_monitor(0.0)
   audio.rev_off()
   audio.comp_off()
 
   -- Set up pages
-  pages_table = {Board.new()}
+  pages_table = {Board.new(
+    add_page,
+    remove_page,
+    swap_page,
+    set_page_index,
+    mark_screen_dirty
+  )}
   pages = UI.Pages.new(1, #pages_table)
 
   -- Render loop
@@ -60,7 +67,7 @@ end
 function key(n, z)
   -- All key presses are routed to the current page's class.
   -- We also provide callbacks for children modifying our state
-  screen_dirty = current_page():key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
+  screen_dirty = current_page():key(n, z)
 end
 
 function enc(n, delta)
@@ -93,6 +100,20 @@ function redraw()
   screen.update()
 end
 
+function cleanup()
+  -- deinitialization
+  metro.free(screen_refresh_metro)
+  screen_refresh_metro = nil
+  -- I'm not particularly sure on the details of Lua memory management, so we go a little overboard here maybe
+  board = pages_table[1]
+  board:cleanup()
+  for i, page in ipairs(pages_table) do
+    pages_table[i] = nil
+  end
+  pages_table = nil
+  pages = nil
+end
+
 -- Utils
 function current_page()
   return pages_table[pages.index]
@@ -105,6 +126,12 @@ end
 
 function add_page(page_instance)
   table.insert(pages_table, page_instance)
+  pages = UI.Pages.new(1, #pages_table)
+  screen_dirty = true
+end
+
+function remove_page(index)
+  table.remove(pages_table, index)
   pages = UI.Pages.new(1, #pages_table)
   screen_dirty = true
 end

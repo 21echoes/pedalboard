@@ -8,7 +8,7 @@ local ReverbPedal = include("lib/ui/pedals/reverb")
 
 local pedal_classes = {VolumePedal, ReverbPedal}
 local MAX_SLOTS = math.min(4, #pedal_classes)
-local EMPTY_PEDAL = "EMPTY_PEDAL"
+local EMPTY_PEDAL = "None"
 local pedal_names = {EMPTY_PEDAL}
 for i, pedal_class in ipairs(pedal_classes) do
   table.insert(pedal_names, pedal_class.name())
@@ -18,16 +18,28 @@ local CLICK_DURATION = 0.7
 local Board = {}
 Board.__index = Board
 
-function Board.new()
+function Board.new(
+  add_page,
+  remove_page,
+  swap_page,
+  set_page_index,
+  mark_screen_dirty
+)
   local i = {}
   setmetatable(i, Board)
+
+  -- Callbacks to our parent when we take page-editing actions
+  i._add_page = add_page
+  i._remove_page = remove_page
+  i._swap_page = swap_page
+  i._set_page_index = set_page_index
+  i._mark_screen_dirty = mark_screen_dirty
 
   i.pedals = {}
   i._pending_pedal_class_index = 0
   i._alt_key_down_time = nil
   i._alt_action_taken = false
   i:_setup_tabs()
-  i:_reset_callbacks()
   i:_add_param_actions()
 
   return i
@@ -65,7 +77,7 @@ function Board:enter()
   self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
 end
 
-function Board:key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
+function Board:key(n, z)
   if n == 2 then
     -- Key down on K2 enables alt mode
     if z == 1 then
@@ -87,7 +99,7 @@ function Board:key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
       return false
     end
     -- Jump to focused pedal's page
-    set_page_index(self.tabs.index + 1)
+    self._set_page_index(self.tabs.index + 1)
     return true
   elseif n == 3 then
     -- Key-up on K3 has no meaning
@@ -106,36 +118,17 @@ function Board:key(n, z, set_page_index, add_page, swap_page, mark_screen_dirty)
       return true
     end
 
-    -- No pedal swap is pending
-    if self:_pending_pedal_class() == nil then
-      return false
-    end
+    param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class().name()) or 1
 
     -- We're on the "New?" slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
-      -- Temporarily set these callbacks so the param setter callback can use them
-      -- While a bit hacky, this is preferred to having a permanent reference to the parent class for now.
-      -- This decision may be revisited later :+1:
-      self._add_page = add_page
-      self._set_page_index = set_page_index
-      self._mark_screen_dirty = mark_screen_dirty
-      params:set(
-        "pedal_" .. self.tabs.index,
-        self:_param_value_for_pedal_name(self:_pending_pedal_class().name())
-      )
+      params:set("pedal_" .. self.tabs.index, param_value)
       return true
     end
 
     -- We're on an existing slot, and the pending pedal type is different than the current type
     if self:_slot_has_pending_switch(self.tabs.index) then
-      -- See above note about these callbacks
-      self._swap_page = swap_page
-      self._set_page_index = set_page_index
-      self._mark_screen_dirty = mark_screen_dirty
-      params:set(
-        "pedal_" .. self.tabs.index,
-        self:_param_value_for_pedal_name(self:_pending_pedal_class().name())
-      )
+      params:set("pedal_" .. self.tabs.index, param_value)
       return true
     end
   end
@@ -165,9 +158,8 @@ function Board:enc(n, delta)
     if self:_pending_pedal_class() == nil then
       self._pending_pedal_class_index = 0
     end
-    -- Clamp min as 1 if on active slot, or 0 if on New slot
-    -- TODO: allow selecting EMPTY_PEDAL to remove the pedal
-    minimum = (not self:_is_new_slot(self.tabs.index)) and 1 or 0
+    -- Allow selecting EMPTY_PEDAL to remove the pedal
+    minimum = 0
     -- We don't want to allow selection of a pedal already in use in another slot
     -- (primarily due to technical restrictions in how params work)
     -- So we make list of pedal classes in the same order as master list, but removing classes in use by other tabs
@@ -212,6 +204,15 @@ function Board:redraw()
   end
 end
 
+function Board:cleanup()
+  -- Remove possible circular references
+  self._add_page = nil
+  self._remove_page = nil
+  self._swap_page = nil
+  self._set_page_index = nil
+  self._mark_screen_dirty = nil
+end
+
 function Board:_setup_tabs()
   tab_names = {}
   use_short_names = self:_use_short_names()
@@ -223,12 +224,6 @@ function Board:_setup_tabs()
     table.insert(tab_names, "New?")
   end
   self.tabs = UI.Tabs.new(1, tab_names)
-end
-
-function Board:_reset_callbacks()
-  self._set_page_index = nil
-  self._add_page = nil
-  self._swap_page = nil
 end
 
 function Board:_render_tab_content(i)
@@ -249,14 +244,24 @@ function Board:_render_tab_content(i)
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
       end
+      -- Prevent a stray line being drawn
+      screen.stroke()
       return
     elseif self:_slot_has_pending_switch(i) then
-      -- Render "Switch to {name of the new pedal}" as centered text
       use_short_names = self:_use_short_names()
-      screen.move(center_x, center_y - 4)
-      screen.text_center(use_short_names and "->" or "Switch to")
-      screen.move(center_x, center_y + 4)
-      screen.text_center(self:_name_of_pending_pedal())
+      if self:_pending_pedal_class() == nil then
+        -- Render "Remove" as centered text
+        screen.move(center_x, center_y)
+        screen.text_center(use_short_names and "X" or "Remove")
+      else
+        -- Render "Switch to {name of the new pedal}" as centered text
+        screen.move(center_x, center_y - 4)
+        screen.text_center(use_short_names and "->" or "Switch to")
+        screen.move(center_x, center_y + 4)
+        screen.text_center(self:_name_of_pending_pedal())
+      end
+      -- Prevent a stray line being drawn
+      screen.stroke()
       return
     end
   end
@@ -287,7 +292,8 @@ end
 function Board:_slot_has_pending_switch(i)
   pending_pedal_class = self:_pending_pedal_class()
   if self:_pending_pedal_class() == nil then
-    return false
+    -- The EMPTY_PEDAL is definitely a switch!
+    return true
   end
   return pending_pedal_class.__index ~= self.pedals[i].__index
 end
@@ -296,7 +302,7 @@ function Board:_name_of_pending_pedal()
   pending_pedal_class = self:_pending_pedal_class()
   use_short_names = self:_use_short_names()
   if pending_pedal_class == nil then
-    return use_short_names and " " or "No Selection"
+    return use_short_names and "None" or "No Selection"
   end
   return pending_pedal_class.name(use_short_names)
 end
@@ -341,15 +347,23 @@ function Board:_param_value_for_pedal_name(_pedal_name)
 end
 
 function Board:_set_pedal_by_index(slot, name_index)
-  -- TODO: this temp callback assignment strategy doesn't seem to work with editing the board from the params menu
   pedal_class_index = name_index - 1
+
+  -- The parent has a page for each pedal at 1 beyond the slot index on the board
+  page_index = slot + 1
+
   if pedal_class_index == 0 then
-    -- TODO: remove pedal from pages, shift the remaining down
+    -- This option means we are removing the pedal in this slot
+    -- The engine is zero-indexed
+    engine_index = slot - 1
+    engine.remove_pedal_at_index(engine_index)
+    table.remove(self.pedals, slot)
+    self:_setup_tabs()
+    self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
+    self._remove_page(page_index)
     return
   end
   pedal_class = pedal_classes[pedal_class_index]
-  -- The parent has a page for each pedal at 1 beyond the slot index on the board
-  page_index = slot + 1
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
     pedal_instance = pedal_class.new()
@@ -373,7 +387,6 @@ function Board:_set_pedal_by_index(slot, name_index)
   end
   self._set_page_index(page_index)
   self._mark_screen_dirty(true)
-  self:_reset_callbacks()
 end
 
 function Board:_is_alt_mode()

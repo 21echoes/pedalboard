@@ -18,7 +18,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * Left-to-right list of slots for pedals
 * E2 changes focused slot
 * E3 changes pedal in focused slot (including "no pedal")
-* E3 doesnt take effect til K3 confirms
+* E3 doesn't take effect til K3 confirms
 * Last slot is always "add new" (using K3 to confirm)
 * K2 jumps to pedal page
 * K2 + E2 re-orders pedals

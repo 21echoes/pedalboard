@@ -132,7 +132,7 @@ Engine_Pedalboard : CroneEngine {
         buses.removeAt(index);
       }, {
         var priorPedal = pedalDetails[boardIds[index - 1]][\synth];
-        if (index == boardIds.size - 1, {
+        if (index == (boardIds.size - 1), {
           priorPedal.set(\out, context.out_b);
         }, {
           priorPedal.set(\out, buses[index]);
