@@ -66,11 +66,7 @@ function TremoloPedal.add_params()
 end
 
 function TremoloPedal:_message_engine_for_param_change(param_id, value)
-  if param_id == "tremolo_rate" then
-    engine.tremolo_rate(coerced_value / 100.0)
-  elseif param_id == "tremolo_depth" then
-    engine.tremolo_depth(coerced_value / 100.0)
-  end
+  engine[param_id](coerced_value / 100.0)
 end
 
 -- TODO: tap tempo

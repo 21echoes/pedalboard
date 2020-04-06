@@ -75,13 +75,7 @@ function ReverbPedal.add_params()
 end
 
 function ReverbPedal:_message_engine_for_param_change(param_id, value)
-  if param_id == "reverb_size" then
-    engine.reverb_size(coerced_value / 100.0)
-  elseif param_id == "reverb_decay" then
-    engine.reverb_decay(coerced_value / 100.0)
-  elseif param_id == "reverb_tone" then
-    engine.reverb_tone(coerced_value / 100.0)
-  end
+  engine[param_id](coerced_value / 100.0)
 end
 
 return ReverbPedal
