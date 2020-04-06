@@ -48,7 +48,7 @@ function init()
   audio.comp_off()
 
   -- Set up pages
-  pages_table = {Board.new(
+  pages_table = {Board:new(
     add_page,
     remove_page,
     swap_page,

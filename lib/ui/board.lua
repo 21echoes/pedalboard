@@ -3,22 +3,21 @@
 
 local UI = require "ui"
 local tabutil = require "tabutil"
-local VolumePedal = include("lib/ui/pedals/volume")
 local ReverbPedal = include("lib/ui/pedals/reverb")
+local TremoloPedal = include("lib/ui/pedals/tremolo")
 
-local pedal_classes = {VolumePedal, ReverbPedal}
+local pedal_classes = {ReverbPedal, TremoloPedal}
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
 local pedal_names = {EMPTY_PEDAL}
 for i, pedal_class in ipairs(pedal_classes) do
-  table.insert(pedal_names, pedal_class.name())
+  table.insert(pedal_names, pedal_class:name())
 end
 local CLICK_DURATION = 0.7
 
 local Board = {}
-Board.__index = Board
 
-function Board.new(
+function Board:new(
   add_page,
   remove_page,
   swap_page,
@@ -26,7 +25,8 @@ function Board.new(
   mark_screen_dirty
 )
   local i = {}
-  setmetatable(i, Board)
+  setmetatable(i, self)
+  self.__index = self
 
   -- Callbacks to our parent when we take page-editing actions
   i._add_page = add_page
@@ -118,7 +118,7 @@ function Board:key(n, z)
       return true
     end
 
-    param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class().name()) or 1
+    param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
 
     -- We're on the "New?" slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
@@ -217,7 +217,7 @@ function Board:_setup_tabs()
   tab_names = {}
   use_short_names = self:_use_short_names()
   for i, pedal in ipairs(self.pedals) do
-    table.insert(tab_names, pedal.name(use_short_names))
+    table.insert(tab_names, pedal:name(use_short_names))
   end
   -- Only add the New slot if we're not yet at the max
   if #self.pedals ~= MAX_SLOTS then
@@ -304,7 +304,7 @@ function Board:_name_of_pending_pedal()
   if pending_pedal_class == nil then
     return use_short_names and "None" or "No Selection"
   end
-  return pending_pedal_class.name(use_short_names)
+  return pending_pedal_class:name(use_short_names)
 end
 
 function Board:_is_new_slot(i)
@@ -366,7 +366,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   pedal_class = pedal_classes[pedal_class_index]
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
-    pedal_instance = pedal_class.new()
+    pedal_instance = pedal_class:new()
     engine.add_pedal(pedal_instance.id)
     table.insert(self.pedals, pedal_instance)
     self:_setup_tabs()
@@ -377,7 +377,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     if pedal_class.__index == self.pedals[slot].__index then
       return
     end
-    pedal_instance = pedal_class.new()
+    pedal_instance = pedal_class:new()
     -- The engine is zero-indexed
     engine_index = slot - 1
     engine.swap_pedal_at_index(engine_index, pedal_instance.id)

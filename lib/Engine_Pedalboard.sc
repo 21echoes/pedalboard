@@ -12,7 +12,10 @@ Engine_Pedalboard : CroneEngine {
 
   alloc {
     // Set up pedal definitions and commands
-    allPedalDefinitions = [VolumePedal, ReverbPedal];
+    allPedalDefinitions = [
+      TremoloPedal,
+      ReverbPedal
+    ];
     allPedalIds = List.new;
     pedalDetails = Dictionary.new;
     allPedalDefinitions.do({|pedalDefinition|
