@@ -8,7 +8,7 @@ DistortionPedal : Pedal {
 
     // First we feed into the distortion
     // Drive controls 1 to 5x the volume with hard-clipping
-    wet = (wet * LinExp.kr(\drive.kr(0.5), 0, 1, 1, 5)).clip2(1.0);
+    wet = (wet * LinExp.kr(\drive.kr(0.5), 0, 1, 1, 5)).distort;
 
     // Then we feed into the Tone section
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
