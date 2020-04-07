@@ -14,13 +14,15 @@ function DelayPedal:new()
   self.__index = self
 
   i.sections = {
-    {"Time & Feedback"},
+    {"Time & Mode", "Feedback"},
     Pedal._default_section(),
   }
-  i.dial_time = UI.Dial.new(22, 19.5, 22, 50, 0, 100, 1)
+  i.dial_time = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
+  -- TODO: this should be a label
+  i.dial_mode = UI.Dial.new(34.5, 27, 22, 0, 0, 1, 1)
   i.dial_feedback = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
-    {{i.dial_time, i.dial_feedback}},
+    {{i.dial_time, i.dial_mode},  {i.dial_feedback}},
     Pedal._default_dials(),
   }
   i:_complete_initialization()
@@ -33,8 +35,8 @@ function DelayPedal:name(short)
 end
 
 function DelayPedal.add_params()
-  -- There are 4 default_params, plus our custom 2
-  params:add_group(DelayPedal:name(), 6)
+  -- There are 4 default_params, plus our custom 3
+  params:add_group(DelayPedal:name(), 7)
 
   -- Must match this pedal's .sc file's *id
   id_prefix = DelayPedal.id
@@ -43,28 +45,50 @@ function DelayPedal.add_params()
   -- TODO: different control spec that controls the exact time
   params:add({
     id = time_id,
-    name = "time",
+    name = "Time",
     type = "control",
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
+  })
+
+  mode_id = id_prefix .. "_mode"
+  params:add({
+    id = mode_id,
+    name = "Mode",
+    type = "option",
+    options = {"Stereo", "Ping-Pong"},
   })
 
   feedback_id = id_prefix .. "_feedback"
   params:add({
     id = feedback_id,
-    name = "feedback",
+    name = "Feedback",
     type = "control",
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   DelayPedal._param_ids = {
-    {{time_id, feedback_id}},
+    {{time_id, mode_id}, {feedback_id}},
     Pedal._add_default_params(id_prefix),
   }
 end
 
+function DelayPedal:_set_value_from_param_value(param_id, value)
+  coerced_value = value
+  if param_id == self.id .. "_mode" then
+    -- The options are 1-indexed, but the mode control expects 0-indexed
+    coerced_value = value - 1
+  end
+  Pedal._set_value_from_param_value(self, param_id, coerced_value)
+end
+
 function DelayPedal:_message_engine_for_param_change(param_id, value)
+  coerced_value = value / 100.0
+  if param_id == self.id .. "_mode" then
+    -- No dividing by 100 for the mode
+    coerced_value = value
+  end
   -- once we have explicit times, no /100 coercion for that param
-  engine[param_id](coerced_value / 100.0)
+  engine[param_id](coerced_value)
 end
 
 return DelayPedal
