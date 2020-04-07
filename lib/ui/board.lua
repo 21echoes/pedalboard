@@ -3,10 +3,12 @@
 
 local UI = require "ui"
 local tabutil = require "tabutil"
-local ReverbPedal = include("lib/ui/pedals/reverb")
-local TremoloPedal = include("lib/ui/pedals/tremolo")
 
-local pedal_classes = {ReverbPedal, TremoloPedal}
+local pedal_classes = {
+  include("lib/ui/pedals/reverb"),
+  include("lib/ui/pedals/overdrive"),
+  include("lib/ui/pedals/tremolo"),
+}
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
 local pedal_names = {EMPTY_PEDAL}

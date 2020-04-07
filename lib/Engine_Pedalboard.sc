@@ -13,8 +13,9 @@ Engine_Pedalboard : CroneEngine {
   alloc {
     // Set up pedal definitions and commands
     allPedalDefinitions = [
-      TremoloPedal,
-      ReverbPedal
+      ReverbPedal,
+      OverdrivePedal,
+      TremoloPedal
     ];
     allPedalIds = List.new;
     pedalDetails = Dictionary.new;
@@ -49,6 +50,8 @@ Engine_Pedalboard : CroneEngine {
     this.addCommand("swap_pedal_at_index", "is", {|msg| this.swapPedalAtIndex(msg[1], msg[2]);});
 
     this.buildNoPedalState;
+
+    // TODO: before outs, put a basic Limiter.ar(mixdown, 1.0) ?
   }
 
   buildNoPedalState {
