@@ -14,6 +14,7 @@ Engine_Pedalboard : CroneEngine {
     // Set up pedal definitions and commands
     allPedalDefinitions = [
       ChorusPedal,
+      DelayPedal,
       DistortionPedal,
       OverdrivePedal,
       ReverbPedal,
@@ -22,7 +23,7 @@ Engine_Pedalboard : CroneEngine {
     allPedalIds = List.new;
     pedalDetails = Dictionary.new;
     allPedalDefinitions.do({|pedalDefinition|
-      pedalDefinition.addDef;
+      pedalDefinition.addDef(context);
       allPedalIds.add(pedalDefinition.id);
       pedalDetails[pedalDefinition.id] = Dictionary.new;
       pedalDetails[pedalDefinition.id][\arguments] = Dictionary.new;

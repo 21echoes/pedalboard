@@ -1,4 +1,6 @@
 Pedal {
+  classvar context;
+
   *id {
     // Override this function to define the pedal's unique ID.
     // It must match the pedal's corresponding Lua pedal class ID.
@@ -21,7 +23,8 @@ Pedal {
 
   *arguments { ^[\bypass, \mix, \in_gain, \out_gain] ++ this.fxArguments; }
 
-  *addDef {
+  *addDef {|contextArg|
+    context = contextArg;
     SynthDef(this.id, {
       var inL = \inL.kr(0),
       inR = \inR.kr(1),

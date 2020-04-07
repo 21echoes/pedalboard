@@ -6,6 +6,7 @@ local tabutil = require "tabutil"
 
 local pedal_classes = {
   include("lib/ui/pedals/chorus"),
+  include("lib/ui/pedals/delay"),
   include("lib/ui/pedals/distortion"),
   include("lib/ui/pedals/overdrive"),
   include("lib/ui/pedals/reverb"),
