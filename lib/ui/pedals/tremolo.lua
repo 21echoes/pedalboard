@@ -1,13 +1,9 @@
 --- TremoloPedal
 -- @classmod TremoloPedal
 
-local ControlSpec = require "controlspec"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
-
--- TODO: put these in a shared place
-CONTROL_SPEC_MIX = ControlSpec.new(0, 100, "lin", 1, 50, "%")
-CONTROL_SPEC_GAIN = ControlSpec.new(-60, 12, "lin", 0.5, 0, "dB")
+local Controlspecs = include("lib/ui/pedals/controlspecs")
 
 local TremoloPedal = Pedal:new()
 TremoloPedal.id = "tremolo"
@@ -48,7 +44,7 @@ function TremoloPedal.add_params()
     id = rate_id,
     name = "Rate",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   depth_id = id_prefix .. "_depth"
@@ -56,7 +52,7 @@ function TremoloPedal.add_params()
     id = depth_id,
     name = "Depth",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   TremoloPedal._param_ids = {

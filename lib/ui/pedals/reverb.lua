@@ -1,13 +1,9 @@
 --- ReverbPedal
 -- @classmod ReverbPedal
 
-local ControlSpec = require "controlspec"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
-
--- TODO: put these in a shared place
-CONTROL_SPEC_MIX = ControlSpec.new(0, 100, "lin", 1, 50, "%")
-CONTROL_SPEC_GAIN = ControlSpec.new(-60, 12, "lin", 0.5, 0, "dB")
+local Controlspecs = include("lib/ui/pedals/controlspecs")
 
 local ReverbPedal = Pedal:new()
 ReverbPedal.id = "reverb"
@@ -49,7 +45,7 @@ function ReverbPedal.add_params()
     id = size_id,
     name = "Size",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   decay_id = id_prefix .. "_decay"
@@ -57,7 +53,7 @@ function ReverbPedal.add_params()
     id = decay_id,
     name = "Decay Time",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   tone_id = id_prefix .. "_tone"
@@ -65,7 +61,7 @@ function ReverbPedal.add_params()
     id = tone_id,
     name = "Tone",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   ReverbPedal._param_ids = {

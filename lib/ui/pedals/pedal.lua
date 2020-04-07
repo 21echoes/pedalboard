@@ -1,12 +1,8 @@
 --- Pedal
 -- @classmod Pedal
 
-local ControlSpec = require "controlspec"
 local UI = require "ui"
-
--- TODO: put these in a shared place
-CONTROL_SPEC_MIX = ControlSpec.new(0, 100, "lin", 1, 50, "%")
-CONTROL_SPEC_GAIN = ControlSpec.new(-60, 12, "lin", 0.5, 0, "dB")
+local Controlspecs = include("lib/ui/pedals/controlspecs")
 
 local Pedal = {}
 Pedal.id = "pedal"
@@ -100,7 +96,7 @@ function Pedal._add_default_params(id_prefix)
     id = mix_id,
     name = "Dry/Wet",
     type = "control",
-    controlspec = CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
   in_gain_id = id_prefix .. "_in_gain"
@@ -108,7 +104,7 @@ function Pedal._add_default_params(id_prefix)
     id = in_gain_id,
     name = "In Gain",
     type = "control",
-    controlspec = CONTROL_SPEC_GAIN,
+    controlspec = Controlspecs.CONTROL_SPEC_GAIN,
   })
 
   out_gain_id = id_prefix .. "_out_gain"
@@ -116,7 +112,7 @@ function Pedal._add_default_params(id_prefix)
     id = out_gain_id,
     name = "Out Gain",
     type = "control",
-    controlspec = CONTROL_SPEC_GAIN,
+    controlspec = Controlspecs.CONTROL_SPEC_GAIN,
   })
 
   return {{bypass_id, mix_id}, {in_gain_id, out_gain_id}}
