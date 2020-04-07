@@ -62,7 +62,7 @@ function TremoloPedal.add_params()
 end
 
 function TremoloPedal:_message_engine_for_param_change(param_id, value)
-  engine[param_id](coerced_value / 100.0)
+  engine[param_id](value / 100.0)
 end
 
 -- TODO: tap tempo
