@@ -15,6 +15,7 @@ Engine_Pedalboard : CroneEngine {
     allPedalDefinitions = [
       ReverbPedal,
       OverdrivePedal,
+      DistortionPedal,
       TremoloPedal
     ];
     allPedalIds = List.new;

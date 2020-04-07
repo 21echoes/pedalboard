@@ -7,6 +7,7 @@ local tabutil = require "tabutil"
 local pedal_classes = {
   include("lib/ui/pedals/reverb"),
   include("lib/ui/pedals/overdrive"),
+  include("lib/ui/pedals/distortion"),
   include("lib/ui/pedals/tremolo"),
 }
 local MAX_SLOTS = math.min(4, #pedal_classes)
