@@ -2,14 +2,17 @@
 A simple collection of chainable effects for the Norns sound computer.
 
 ## Pedals
-* Compressor/Overdrive
+* Delay
 * Reverb
-* Chorus/Flanger .../Phaser?
-* Distortion/Bitcrusher
-* Delay (ping pong mode, etc) (hold K2 and tap k3 for tap tempo)
-* Tremelo
-* EQ?
-* Tuner?
+* Overdrive
+* Chorus
+* Tremolo
+* Distortion
+* Flanger
+* Compressor
+* Sustain
+* Bitcrusher
+* More to come in future versions! File a GitHub issue with recommendations
 
 ## UI & Controls
 * E1 always changes page
@@ -25,32 +28,46 @@ A simple collection of chainable effects for the Norns sound computer.
 * K2 + E3 changes wet/dry for focused pedal
 * K2 + K3 toggles bypass for focused pedal
 
-### Page N: Pedal
-* UI is dual-dials widget from the UI demo (controlled by E2 & E3)
-* K2 cycles left thru knob pairs, looping at the left edge
-* K3 cycles right thru knob pairs, looping at the right edge
-* Each pedal has knobs specific to its effect
-* Every pedal has the following knobs as its last 4:
-* Bypass (as a knob -- any left motion toggles off, any right motion toggles on)
-* Wet/dry
-* In gain
-* Out gain
+### Other Pages: the Pedals
+* UI is custom per pedal, but typically shows a dial or two at a time, controlled by E2 & E3
+* Each pedal has dials specific to its effect
+* K2 cycles left thru dial pairs, moving left a section or looping at the left edge
+* K3 cycles right thru dial pairs, moving right a section or looping at the right edge
+* Every pedal has the following dials as its last 4:
+  * Bypass (as a dial -- any left motion toggles off, any right motion toggles on)
+  * Wet/dry
+  * In gain
+  * Out gain
 
-#### A System of Simple and Fine Control
-* Pedal name at top
-* Then simple set of knobs
-* For fine control: extra stuff below (when scrolled to, header stays visible, now with horizontal separator)
-* How do simple & fine interact? Via a "catch up" algorithm
-* Each simple knob is really a combo of fine settings. If fine settings don't line up with where knob says it is, then they move by more than the knob moves until they catch up (and thereafter behave normally)
+## Roadmap
+### Initial Release
+* This project is currently in a beta state!
+* Extensive usage and bug auditing to find and fix any bug or tune any pedals that need tuning
+* Then we'll film a brief demo video and post to [Lines](https://llllllll.co/)
 
-## Notes:
-Look at some other apps to seed FX code via SC engines
+### More Pedals!
+* EQ (params: Low Gain, Low Res, Low Freq, Mid Gain, Mid Res, Mid Freq, High Gain, High Res, High Freq)
+* Vibrato (params: Rate, Depth)
+* Pitch Shifter (params: Interval, Fine)
+* Phaser (params: Rez, Rate, Depth, Sweep?)
+* Noise Gate (params: Threshold, Release)
+* Auto-Wah (params: Depth, Rate, Sensitivity, Mode)
+* Tuner (params: Note, Hear?)
+  * Also: different display, e.g. label "A3 (220 Hz)" with a VU-meter-style graph showing how close you are
 
-Also look at some actual commonly used pedals:
-* Strymon BigSky Reverb
-* Ibanez TS9 Tubescreamer
-* BOSS DS-1 Distortion
-* Electro-Harmonix Big Muff Pi Fuzz
-* Electro-Harmonix Memory Boy Delay
-* BOSS CE-2W Chorus
-* Fender Tre-Verb Tremolo
+### Better Pedals!
+* Add Shimmer to the Reverb pedal
+* Add Tape/Lo-Fi to the Delay Pedal
+* Add Tap Tempo (hold K2 and tap K3) to the Delay and Tremolo pedals
+* Add Shape to Tremolo
+* Continued iteration on how the dials alter the effect
+  * Covering musical ranges with multiple sweet spots, while also offering interesting extremes
+* Bypass should be a label, not a dial
+
+### A System of Simple and Fine Control
+* Pedals should be able to have more parameters, beyond the meta-controls in their main UI
+* This could live either in the menu only, or as the last section to the right of a pedal
+* Each meta-control is really a combo of fine settings. If fine settings don't line up with where knob says it is, then they move by more than the knob moves until they catch up (and thereafter behave normally)
+
+### Marking a PSet as default
+* Would be nice to have some pedals in place right when you launch, if you use them that often

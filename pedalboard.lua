@@ -12,10 +12,10 @@
 -- K2 + K3 toggles bypass
 --
 -- Pedal Pages
--- E2 / E3 change knob values
--- K2 / K3 cycle thru knob pairs
+-- E2 / E3 change dial values
+-- K2 / K3 cycle thru dial pairs
 --
--- v0.1 @21echoes
+-- v0.9.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
