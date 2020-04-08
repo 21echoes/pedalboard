@@ -99,7 +99,7 @@ Engine_Pedalboard : CroneEngine {
         out = bus.index;
         if (index != 0, {
           // Middle pedals also use the existing bus coming out of the pedal already at their index as their input
-          var priorBus = buses[index - 1],
+          var priorBus = buses[index - 1];
           inL = priorBus.index;
           inR = priorBus.index + 1;
         });
@@ -162,10 +162,6 @@ Engine_Pedalboard : CroneEngine {
   swapPedalAtIndex {|index, newPedalId|
     this.removePedalAtIndex(index);
     this.insertPedalAtIndex(index, newPedalId);
-  }
-
-  movePedal {|fromIndex, toIndex|
-    // TODO later
   }
 
   free {

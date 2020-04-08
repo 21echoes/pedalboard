@@ -50,6 +50,7 @@ function init()
   -- Set up pages
   pages_table = {Board:new(
     add_page,
+    insert_page_at_index,
     remove_page,
     swap_page,
     set_page_index,
@@ -126,6 +127,12 @@ end
 
 function add_page(page_instance)
   table.insert(pages_table, page_instance)
+  pages = UI.Pages.new(1, #pages_table)
+  screen_dirty = true
+end
+
+function insert_page_at_index(index, page_instance)
+  table.insert(pages_table, index, page_instance)
   pages = UI.Pages.new(1, #pages_table)
   screen_dirty = true
 end

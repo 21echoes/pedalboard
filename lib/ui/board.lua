@@ -28,6 +28,7 @@ local Board = {}
 
 function Board:new(
   add_page,
+  insert_page_at_index,
   remove_page,
   swap_page,
   set_page_index,
@@ -39,6 +40,7 @@ function Board:new(
 
   -- Callbacks to our parent when we take page-editing actions
   i._add_page = add_page
+  i._insert_page_at_index = insert_page_at_index
   i._remove_page = remove_page
   i._swap_page = swap_page
   i._set_page_index = set_page_index
@@ -94,16 +96,33 @@ function Board:key(n, z)
   if n == 2 then
     -- Key down on K2 enables alt mode
     if z == 1 then
+      -- Alt mode is meaningless on the new slot
+      if self:_is_new_slot(self.tabs.index) then
+        return false
+      end
       self._alt_key_down_time = util.time()
+      -- Record what tab we started on for our K2+E2 pedal reordering feature
+      self._reorder_source = self.tabs.index
+      self._reorder_destination = self.tabs.index
       return false
     end
 
-    -- Key up on K2 after an alt action was taken, or even just after a longer held time, counts as nothing
-    local key_down_duration = util.time() - self._alt_key_down_time
-    self._alt_key_down_time = nil
-    if self._alt_action_taken or key_down_duration > CLICK_DURATION then
+    -- Key up on K2 after scrolling E2 commits a pedal re-order
+    if self._reorder_source ~= self._reorder_destination then
+      self._alt_key_down_time = nil
       self._alt_action_taken = false
-      return
+      self:_reorder_pedals()
+      return true
+    end
+
+    -- Key up on K2 after an alt action was taken, or even just after a longer held time, counts as nothing
+    if self._alt_key_down_time then
+      local key_down_duration = util.time() - self._alt_key_down_time
+      self._alt_key_down_time = nil
+      if self._alt_action_taken or key_down_duration > CLICK_DURATION then
+        self._alt_action_taken = false
+        return false
+      end
     end
 
     -- Otherwise we count this key-up as a click on K2
@@ -122,10 +141,6 @@ function Board:key(n, z)
 
     -- Alt+K3 means toggle bypass on current pedal
     if self:_is_alt_mode() then
-      if self:_is_new_slot(self.tabs.index) then
-        -- No bypass to toggle on the New slot
-        return false
-      end
       self.pedals[self.tabs.index]:toggle_bypass()
       self._alt_action_taken = true
       return true
@@ -155,6 +170,16 @@ end
 
 function Board:enc(n, delta)
   if n == 2 then
+    -- Alt+E2 re-orders pedals
+    if self:_is_alt_mode() then
+      self._alt_action_taken = true
+      local direction = util.clamp(delta, -1, 1)
+      self._reorder_destination = util.clamp(self._reorder_destination + direction, 1, #self.pedals)
+      self:_setup_tabs()
+      return true
+    end
+
+
     -- Change which pedal slot is focused
     self.tabs:set_index_delta(util.clamp(delta, -1, 1), false)
     self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
@@ -162,10 +187,6 @@ function Board:enc(n, delta)
   elseif n == 3 then
     -- Alt+E3 changes wet/dry
     if self:_is_alt_mode() then
-      if self:_is_new_slot(self.tabs.index) then
-        -- No wet/dry to change on the New slot
-        return false
-      end
       self.pedals[self.tabs.index]:scroll_mix(delta)
       self._alt_action_taken = true
       return true
@@ -220,7 +241,24 @@ function Board:redraw()
   end
   self.tabs:redraw()
   for i, title in ipairs(self.tabs.titles) do
-    self:_render_tab_content(i)
+    render_index = i
+    -- If we're mid-pedal-reorder, render the after-reorder state
+    if self._reorder_source ~= self._reorder_destination then
+      if self._reorder_source > self._reorder_destination then
+        if i == self._reorder_destination then
+          render_index = self._reorder_source
+        elseif i > self._reorder_destination and i <= self._reorder_source then
+          render_index = i - 1
+        end
+      else
+        if i == self._reorder_destination then
+          render_index = self._reorder_source
+        elseif i >= self._reorder_source and i < self._reorder_destination then
+          render_index = i + 1
+        end
+      end
+    end
+    self:_render_tab_content(render_index)
   end
 end
 
@@ -237,13 +275,34 @@ function Board:_setup_tabs()
   local tab_names = {}
   local use_short_names = self:_use_short_names()
   for i, pedal in ipairs(self.pedals) do
-    table.insert(tab_names, pedal:name(use_short_names))
+    pedal_name_index = i
+    -- If we're mid-pedal-reorder, render the after-reorder state
+    if self._reorder_source ~= self._reorder_destination then
+      if self._reorder_source > self._reorder_destination then
+        if i == self._reorder_destination then
+          pedal_name_index = self._reorder_source
+        elseif i > self._reorder_destination and i <= self._reorder_source then
+          pedal_name_index = i - 1
+        end
+      else
+        if i == self._reorder_destination then
+          pedal_name_index = self._reorder_source
+        elseif i >= self._reorder_source and i < self._reorder_destination then
+          pedal_name_index = i + 1
+        end
+      end
+    end
+    table.insert(tab_names, self.pedals[pedal_name_index]:name(use_short_names))
   end
   -- Only add the New slot if we're not yet at the max
   if #self.pedals ~= MAX_SLOTS then
     table.insert(tab_names, "New?")
   end
   self.tabs = UI.Tabs.new(1, tab_names)
+  -- If we're mid-pedal-reorder, show the reorder destination as the active tab
+  if self._reorder_destination then
+    self.tabs:set_index(self._reorder_destination)
+  end
 end
 
 function Board:_render_tab_content(i)
@@ -263,6 +322,15 @@ function Board:_render_tab_content(i)
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
       end
+      -- Prevent a stray line being drawn
+      screen.stroke()
+      return
+    elseif self._reorder_source ~= self._reorder_destination and i == self._reorder_destination then
+      -- Render "Move here" as centered text
+      screen.move(center_x, center_y - 4)
+      screen.text_center("Move")
+      screen.move(center_x, center_y + 4)
+      screen.text_center("here")
       -- Prevent a stray line being drawn
       screen.stroke()
       return
@@ -367,6 +435,29 @@ function Board:_param_value_for_pedal_name(_pedal_name)
     end
   end
   return 1
+end
+
+function Board:_reorder_pedals()
+  local pedal_instance_to_move = self.pedals[self._reorder_source]
+
+  -- remove pedal at reorder_source
+  engine.remove_pedal_at_index(self._reorder_source - 1) -- The engine is zero-indexed
+  table.remove(self.pedals, self._reorder_source)
+  self._remove_page(self._reorder_source + 1) -- The parent has a page for each pedal at 1 beyond the slot index on the board
+
+  -- insert the pedal at reorder_destination
+  engine.insert_pedal_at_index(self._reorder_destination - 1, pedal_instance_to_move.id) -- The engine is zero-indexed
+  table.insert(self.pedals, self._reorder_destination, pedal_instance_to_move)
+  self._insert_page_at_index(self._reorder_destination + 1, pedal_instance_to_move) -- The parent has a page for each pedal at 1 beyond the slot index on the board
+
+  -- Re-initialize tabs, pending pedal class, sync params, and clear out re-order state
+  local reorder_destination = self._reorder_destination
+  self._reorder_source = nil
+  self._reorder_destination = nil
+  self:_setup_tabs()
+  self.tabs:set_index(reorder_destination)
+  self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
+  self:_sync_pedals_to_params(force)
 end
 
 function Board:_set_pedal_by_index(slot, name_index)
