@@ -4,17 +4,18 @@
 local UI = require "ui"
 local tabutil = require "tabutil"
 
+-- All possible pedals, ordered by something like how common they are
 local pedal_classes = {
-  include("lib/ui/pedals/bitcrusher"),
-  include("lib/ui/pedals/chorus"),
-  include("lib/ui/pedals/compressor"),
   include("lib/ui/pedals/delay"),
+  include("lib/ui/pedals/reverb"),
+  include("lib/ui/pedals/overdrive"),
+  include("lib/ui/pedals/chorus"),
+  include("lib/ui/pedals/tremolo"),
   include("lib/ui/pedals/distortion"),
   include("lib/ui/pedals/flanger"),
-  include("lib/ui/pedals/overdrive"),
-  include("lib/ui/pedals/reverb"),
+  include("lib/ui/pedals/compressor"),
   include("lib/ui/pedals/sustain"),
-  include("lib/ui/pedals/tremolo"),
+  include("lib/ui/pedals/bitcrusher"),
 }
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
