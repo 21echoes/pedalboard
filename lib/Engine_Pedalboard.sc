@@ -16,6 +16,7 @@ Engine_Pedalboard : CroneEngine {
       ChorusPedal,
       DelayPedal,
       DistortionPedal,
+      FlangerPedal,
       OverdrivePedal,
       ReverbPedal,
       TremoloPedal
