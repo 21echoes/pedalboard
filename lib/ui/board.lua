@@ -5,6 +5,7 @@ local UI = require "ui"
 local tabutil = require "tabutil"
 
 local pedal_classes = {
+  include("lib/ui/pedals/bitcrusher"),
   include("lib/ui/pedals/chorus"),
   include("lib/ui/pedals/compressor"),
   include("lib/ui/pedals/delay"),

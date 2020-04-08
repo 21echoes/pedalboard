@@ -13,6 +13,7 @@ Engine_Pedalboard : CroneEngine {
   alloc {
     // Set up pedal definitions and commands
     allPedalDefinitions = [
+      BitcrusherPedal,
       ChorusPedal,
       CompressorPedal,
       DelayPedal,
