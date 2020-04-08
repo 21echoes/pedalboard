@@ -14,6 +14,7 @@ Engine_Pedalboard : CroneEngine {
     // Set up pedal definitions and commands
     allPedalDefinitions = [
       ChorusPedal,
+      CompressorPedal,
       DelayPedal,
       DistortionPedal,
       FlangerPedal,

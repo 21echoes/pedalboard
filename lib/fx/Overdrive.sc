@@ -6,7 +6,9 @@ OverdrivePedal : Pedal {
   *fxDef {^{|wet|
     var drive, tone, freq, filterType;
 
-    // First we feed into the overdrive
+    // First we feed into a HPF to filter out sub-20Hz
+    wet = HPF.ar(wet, 25);
+    // Then we feed into the overdrive
     // Drive controls 1 to 3x the volume with soft-clipping
     wet = (wet * LinLin.kr(\drive.kr(0.5), 0, 1, 1, 3)).softclip;
 

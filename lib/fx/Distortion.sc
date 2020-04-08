@@ -6,7 +6,9 @@ DistortionPedal : Pedal {
   *fxDef {^{|wet|
     var drive, tone, freq, filterType;
 
-    // First we feed into the distortion
+    // First we feed into a HPF to filter out sub-20Hz
+    wet = HPF.ar(wet, 25);
+    // Then we feed into the distortion
     // Drive controls 1 to 5x the volume with hard-clipping
     wet = (wet * LinExp.kr(\drive.kr(0.5), 0, 1, 1, 5)).distort;
 
