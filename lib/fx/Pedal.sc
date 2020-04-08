@@ -45,6 +45,7 @@ Pedal {
       // If bypass is on, act as if the mix is 0% no matter what
       effectiveMixRate = min(mix, 1 - bypass);
       mixdown = Mix.new([dry * (1 - effectiveMixRate), wet * effectiveMixRate]);
+      // TODO: consider adding a limiter here
       Out.ar(out, mixdown);
     }).add;
   }

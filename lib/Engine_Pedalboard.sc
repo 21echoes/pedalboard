@@ -20,6 +20,7 @@ Engine_Pedalboard : CroneEngine {
       FlangerPedal,
       OverdrivePedal,
       ReverbPedal,
+      SustainPedal,
       TremoloPedal
     ];
     allPedalIds = List.new;
