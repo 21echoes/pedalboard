@@ -43,6 +43,8 @@ function Board:new(
   i._swap_page = swap_page
   i._set_page_index = set_page_index
   i._mark_screen_dirty = mark_screen_dirty
+  i._manual_action_will_require_param_sync = false
+  i._is_syncing_to_params = false
 
   i.pedals = {}
   i._pending_pedal_class_index = 0
@@ -57,7 +59,7 @@ end
 function Board:add_params()
   params:add_group("Board", MAX_SLOTS)
   for i = 1, MAX_SLOTS do
-    param_id = "pedal_" .. i
+    local param_id = "pedal_" .. i
     params:add({
       id=param_id,
       name="Pedal " .. i,
@@ -75,8 +77,10 @@ end
 
 function Board:_add_param_actions()
   for i = 1, MAX_SLOTS do
-    param_id = "pedal_" .. i
-    params:set_action(param_id, function(value) self:_set_pedal_by_index(i, value) end)
+    local param_id = "pedal_" .. i
+    params:set_action(param_id, function(value)
+      self:_set_pedal_by_index(i, value)
+    end)
   end
 end
 
@@ -95,7 +99,7 @@ function Board:key(n, z)
     end
 
     -- Key up on K2 after an alt action was taken, or even just after a longer held time, counts as nothing
-    key_down_duration = util.time() - self._alt_key_down_time
+    local key_down_duration = util.time() - self._alt_key_down_time
     self._alt_key_down_time = nil
     if self._alt_action_taken or key_down_duration > CLICK_DURATION then
       self._alt_action_taken = false
@@ -127,7 +131,7 @@ function Board:key(n, z)
       return true
     end
 
-    param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
+    local param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
 
     -- We're on the "New?" slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
@@ -137,6 +141,10 @@ function Board:key(n, z)
 
     -- We're on an existing slot, and the pending pedal type is different than the current type
     if self:_slot_has_pending_switch(self.tabs.index) then
+      if param_value == 1 then
+        -- If we're removing a pedal, we're going to need to do some local->param syncing
+        self._manual_action_will_require_param_sync = true
+      end
       params:set("pedal_" .. self.tabs.index, param_value)
       return true
     end
@@ -168,21 +176,21 @@ function Board:enc(n, delta)
       self._pending_pedal_class_index = 0
     end
     -- Allow selecting EMPTY_PEDAL to remove the pedal
-    minimum = 0
+    local minimum = 0
     -- We don't want to allow selection of a pedal already in use in another slot
     -- (primarily due to technical restrictions in how params work)
     -- So we make list of pedal classes in the same order as master list, but removing classes in use by other tabs
-    indexes_of_active_pedals = {}
-    current_pedal_class_index_at_current_tab = 0
+    local indexes_of_active_pedals = {}
+    local current_pedal_class_index_at_current_tab = 0
     for i = 1, #self.pedals do
-      pedal_class_index = self:_get_pedal_class_index_for_tab(i)
+      local pedal_class_index = self:_get_pedal_class_index_for_tab(i)
       table.insert(indexes_of_active_pedals, pedal_class_index)
       if i == self.tabs.index then
         current_pedal_class_index_at_current_tab = pedal_class_index
       end
     end
-    valid_pedal_classes = {}
-    pending_index_in_valid_classes = minimum
+    local valid_pedal_classes = {}
+    local pending_index_in_valid_classes = minimum
     for i, pedal_class in ipairs(pedal_classes) do
       if i == current_pedal_class_index_at_current_tab or not tabutil.contains(indexes_of_active_pedals, i) then
         table.insert(valid_pedal_classes, pedal_class)
@@ -192,7 +200,7 @@ function Board:enc(n, delta)
       end
     end
     -- We then take our index within that more limited list, and have the encoder scroll us within the limited list
-    new_index_in_valid_classes = util.clamp(pending_index_in_valid_classes + delta, minimum, #valid_pedal_classes)
+    local new_index_in_valid_classes = util.clamp(pending_index_in_valid_classes + delta, minimum, #valid_pedal_classes)
     -- Finally, we map this index within the limited list back to the index in the master list
     if new_index_in_valid_classes == 0 then
       -- If we've selected EMPTY_PEDAL, then we don't need to do any more work, just use that directly
@@ -207,6 +215,9 @@ function Board:enc(n, delta)
 end
 
 function Board:redraw()
+  if self._sync_to_params_on_next_redraw then
+    self:_sync_pedals_to_params(true)
+  end
   self.tabs:redraw()
   for i, title in ipairs(self.tabs.titles) do
     self:_render_tab_content(i)
@@ -223,8 +234,8 @@ function Board:cleanup()
 end
 
 function Board:_setup_tabs()
-  tab_names = {}
-  use_short_names = self:_use_short_names()
+  local tab_names = {}
+  local use_short_names = self:_use_short_names()
   for i, pedal in ipairs(self.pedals) do
     table.insert(tab_names, pedal:name(use_short_names))
   end
@@ -236,10 +247,10 @@ function Board:_setup_tabs()
 end
 
 function Board:_render_tab_content(i)
-  offset, width = self:_get_offset_and_width(i)
+  local offset, width = self:_get_offset_and_width(i)
   if i == self.tabs.index then
-    center_x = offset + (width / 2)
-    center_y = 38
+    local center_x = offset + (width / 2)
+    local center_y = 38
     if self:_is_new_slot(i) then
       if self:_pending_pedal_class() == nil then
         -- Render "No Pedal Selected" as centered text
@@ -247,9 +258,8 @@ function Board:_render_tab_content(i)
         screen.text_center(self:_name_of_pending_pedal())
       else
         -- Render "Add {name of the new pedal}" as centered text
-        use_short_names = self:_use_short_names()
         screen.move(center_x, center_y - 4)
-        screen.text_center(use_short_names and "+" or "Add")
+        screen.text_center(self:_use_short_names() and "+" or "Add")
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
       end
@@ -257,7 +267,7 @@ function Board:_render_tab_content(i)
       screen.stroke()
       return
     elseif self:_slot_has_pending_switch(i) then
-      use_short_names = self:_use_short_names()
+      local use_short_names = self:_use_short_names()
       if self:_pending_pedal_class() == nil then
         -- Render "Remove" as centered text
         screen.move(center_x, center_y)
@@ -285,9 +295,9 @@ function Board:_render_tab_content(i)
 end
 
 function Board:_get_offset_and_width(i)
-  num_tabs = (#self.tabs.titles == 0) and 1 or #self.tabs.titles
-  width = 128 / num_tabs
-  offset = width * (i - 1)
+  local num_tabs = (#self.tabs.titles == 0) and 1 or #self.tabs.titles
+  local width = 128 / num_tabs
+  local offset = width * (i - 1)
   return offset, width
 end
 
@@ -299,7 +309,7 @@ function Board:_pending_pedal_class()
 end
 
 function Board:_slot_has_pending_switch(i)
-  pending_pedal_class = self:_pending_pedal_class()
+  local pending_pedal_class = self:_pending_pedal_class()
   if self:_pending_pedal_class() == nil then
     -- The EMPTY_PEDAL is definitely a switch!
     return true
@@ -308,8 +318,8 @@ function Board:_slot_has_pending_switch(i)
 end
 
 function Board:_name_of_pending_pedal()
-  pending_pedal_class = self:_pending_pedal_class()
-  use_short_names = self:_use_short_names()
+  local pending_pedal_class = self:_pending_pedal_class()
+  local use_short_names = self:_use_short_names()
   if pending_pedal_class == nil then
     return use_short_names and "None" or "No Selection"
   end
@@ -329,7 +339,7 @@ function Board:_get_pedal_class_index_for_tab(i)
     return 0
   end
 
-  pedal_class_at_i = self.pedals[i].__index
+  local pedal_class_at_i = self.pedals[i].__index
   -- TODO: port to tabutil.key
   for i, pedal_class in ipairs(pedal_classes) do
     if pedal_class_at_i == pedal_class then
@@ -346,6 +356,10 @@ function Board:_use_short_names()
   return #self.pedals >= 2
 end
 
+function Board:_is_alt_mode()
+  return self._alt_key_down_time ~= nil
+end
+
 function Board:_param_value_for_pedal_name(_pedal_name)
   for i, pedal_name in ipairs(pedal_names) do
     if pedal_name == _pedal_name then
@@ -356,17 +370,26 @@ function Board:_param_value_for_pedal_name(_pedal_name)
 end
 
 function Board:_set_pedal_by_index(slot, name_index)
-  pedal_class_index = name_index - 1
+  if self._is_syncing_to_params then
+    -- See _sync_pedals_to_params for explanation
+    if slot == MAX_SLOTS then
+      self._is_syncing_to_params = false
+      self._manual_action_will_require_param_sync = false
+    end
+    return
+  end
+
+  local pedal_class_index = name_index - 1
 
   -- The parent has a page for each pedal at 1 beyond the slot index on the board
-  page_index = slot + 1
+  local page_index = slot + 1
 
   if pedal_class_index == 0 then
     -- This option means we are removing the pedal in this slot
-    -- The engine is zero-indexed
-    engine_index = slot - 1
+    local engine_index = slot - 1 -- The engine is zero-indexed
     engine.remove_pedal_at_index(engine_index)
     table.remove(self.pedals, slot)
+    self:_sync_pedals_to_params()
     self:_setup_tabs()
     self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
     self._remove_page(page_index)
@@ -375,7 +398,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   pedal_class = pedal_classes[pedal_class_index]
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
-    pedal_instance = pedal_class:new()
+    local pedal_instance = pedal_class:new()
     engine.add_pedal(pedal_instance.id)
     table.insert(self.pedals, pedal_instance)
     self:_setup_tabs()
@@ -386,9 +409,9 @@ function Board:_set_pedal_by_index(slot, name_index)
     if pedal_class.__index == self.pedals[slot].__index then
       return
     end
-    pedal_instance = pedal_class:new()
+    local pedal_instance = pedal_class:new()
     -- The engine is zero-indexed
-    engine_index = slot - 1
+    local engine_index = slot - 1
     engine.swap_pedal_at_index(engine_index, pedal_instance.id)
     self.pedals[slot] = pedal_instance
     self:_setup_tabs()
@@ -398,8 +421,40 @@ function Board:_set_pedal_by_index(slot, name_index)
   self._mark_screen_dirty(true)
 end
 
-function Board:_is_alt_mode()
-  return self._alt_key_down_time ~= nil
+function Board:_sync_pedals_to_params(force)
+  -- Removing a pedal or changing pedal order affects more parameters than just one.
+  -- This function keeps the board's and engine's pedal list in sync with the parameter values
+  -- by iterating over all the slots and setting the parameter to the board's value.
+  -- During this process, we turn off the normal param-setting side-effects
+  -- (as we got here via the side-effect we wanted and the board's pedals are in the right state.
+  -- we don't want more side-effects)
+  if force or self._manual_action_will_require_param_sync then
+    self._sync_to_params_on_next_redraw = false
+    self._is_syncing_to_params = true
+    for i = 1, MAX_SLOTS do
+      local param_id = "pedal_" .. i
+      local param_value = 1 -- the EMPTY_PEDAL param_value if there's no pedal at self.pedals[i]
+      if i <= #self.pedals then
+        param_value = self:_param_value_for_pedal_name(self.pedals[i]:name())
+      end
+      local current_value = params:get(param_id)
+      if current_value ~= param_value then
+        params:set(param_id, param_value)
+      elseif i == MAX_SLOTS then
+        -- params:set has no effect if current value == param_value.
+        -- So, if we would have cleaned up as a side-effect of the param's action (which we do when i == MAX_SLOTS),
+        -- we instead clean up in here directly
+        self._is_syncing_to_params = false
+        self._manual_action_will_require_param_sync = false
+      end
+    end
+  else
+    -- This happened via the norns menu, not an in-app action.
+    -- If they're in the norns menu and just took an editing action,
+    -- it would be confusing to alter/overwrite their edits.
+    -- Instead, sync params once we're back in this app (detected via a call to redraw)
+    self._sync_to_params_on_next_redraw = true
+  end
 end
 
 return Board
