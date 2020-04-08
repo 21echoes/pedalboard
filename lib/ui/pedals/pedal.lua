@@ -196,8 +196,8 @@ function Pedal:redraw()
     screen.level(3)
     screen.text_right(">")
   end
-  -- Name of pedal at the bottom
-  screen.move(64, 64)
+  -- Name of pedal at the bottom, leaving room for the descender
+  screen.move(64, 62)
   screen.level(15)
   screen.text_center(self:name())
   -- Prevent a stray line being drawn
