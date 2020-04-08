@@ -19,6 +19,7 @@
 
 engine.name = "Pedalboard"
 local UI = require "ui"
+local encoders = require "encoders"
 local Board = include("lib/ui/board")
 
 -- Pages UI management
@@ -58,6 +59,9 @@ function init()
   )}
   pages = UI.Pages.new(1, #pages_table)
 
+  -- Set the encoder sensitivities
+  _set_encoder_sensitivities()
+
   -- Render loop
   screen_refresh_metro = metro.init()
   screen_refresh_metro.event = render_loop
@@ -75,6 +79,7 @@ function enc(n, delta)
   if n == 1 then
     -- E1 changes page
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
+    _set_encoder_sensitivities()
     current_page():enter()
     screen_dirty = true
   else
@@ -122,6 +127,8 @@ end
 
 function set_page_index(new_page_index)
   pages:set_index(new_page_index)
+  current_page():enter()
+  _set_encoder_sensitivities()
   screen_dirty = true
 end
 
@@ -150,4 +157,12 @@ end
 
 function mark_screen_dirty(is_screen_dirty)
   screen_dirty = is_screen_dirty
+end
+
+function _set_encoder_sensitivities()
+  -- 1 sensitivity should be a bit slower
+  norns.enc.sens(1, 5)
+  -- Set the E2 and E3 sensitivities to be quite slower on the Board, otherwise just a bit slower
+  norns.enc.sens(2, pages.index == 1 and 5 or 2)
+  norns.enc.sens(3, pages.index == 1 and 6 or 2)
 end
