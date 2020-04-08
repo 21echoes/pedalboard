@@ -4,7 +4,8 @@ ReverbPedal : Pedal {
   *fxArguments { ^[\size, \decay, \tone]; }
 
   *fxDef {^{|wet|
-    // Modeled on @justmat's Pools reverb (TODO: in fact, maybe add shimmer?)
+    // Adapted from @justmat's Pools
+    // TODO: in fact, maybe add shimmer?
     var size, decay, tone, t60, reverbSize, decayBySize, damp, earlyDiff, freq, filterType;
 
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz

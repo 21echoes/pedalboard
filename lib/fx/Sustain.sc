@@ -4,6 +4,7 @@ SustainPedal : Pedal {
   *fxArguments { ^[\drive, \gate, \tone]; }
 
   *fxDef {^{|wet|
+    // Adapted from Thor Magnusson's Scoring Sound
     var drive, gate, ratio, threshold, gain, tone, freq, filterType;
 
     // First we feed into a HPF to filter out sub-20Hz
