@@ -18,6 +18,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * E1 always changes page
 
 ### Page 1: Board
+![board](screenshots/board.png)
 * Left-to-right list of slots for pedals
 * E2 changes focused slot
 * E3 changes pedal in focused slot (including "no pedal")
@@ -29,6 +30,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * K2 + K3 toggles bypass for focused pedal
 
 ### Other Pages: the Pedals
+![board](screenshots/pedal.png)
 * UI is custom per pedal, but typically shows a dial or two at a time, controlled by E2 & E3
 * Each pedal has dials specific to its effect
 * K2 cycles left thru dial pairs, moving left a section or looping at the left edge
@@ -38,6 +40,11 @@ A simple collection of chainable effects for the Norns sound computer.
   * Wet/dry
   * In gain
   * Out gain
+
+## Requirements
+* norns (200328 or later)
+* Audio in (stereo preferred)
+* Reset after install (this is a new Engine)
 
 ## Roadmap
 ### Initial Release
