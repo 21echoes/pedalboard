@@ -7,9 +7,9 @@ FlangerPedal : Pedal {
     // Adapted from Thor Magnusson's Scoring Sound
     var numChannels, maxDelay, feedback, feedbackBuses, rate, depth, preDelay;
     numChannels = 2;
-    maxDelay = 0.05;
+    maxDelay = 0.013;
     rate = LinExp.kr(\rate.kr(0.5), 0, 1, 0.004, 10);
-    depth = LinExp.kr(\depth.kr(0.5), 0, 1, 0.0001, maxDelay * 0.25);
+    depth = LinExp.kr(\depth.kr(0.5), 0, 1, 0.0001, maxDelay * 0.3);
     preDelay = LinLin.kr(\predelay.kr(0.5), 0, 1, 0 + depth, maxDelay - depth);
     // Allow just-beyond-unity feedback
     feedback = LinExp.kr(\feedback.kr(0.5), 0, 1, 0.0001, 1.1);
@@ -28,9 +28,8 @@ FlangerPedal : Pedal {
         LFPar.kr(rate, 0, depth, preDelay),
         0
       );
-      mixed = liveChannel + delayedSignal;
-      Out.ar(feedbackBuses[cNum].index, mixed);
-      mixed;
+      Out.ar(feedbackBuses[cNum].index, delayedSignal);
+      delayedSignal;
     });
   }}
 }
