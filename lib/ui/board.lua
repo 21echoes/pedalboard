@@ -60,7 +60,8 @@ function Board:new(
 end
 
 function Board:add_params()
-  params:add_group("Board", MAX_SLOTS)
+  -- Don't add the group, as for now we're just hiding these params
+  -- params:add_group("Board", MAX_SLOTS)
   for i = 1, MAX_SLOTS do
     local param_id = "pedal_" .. i
     params:add({
@@ -70,6 +71,11 @@ function Board:add_params()
       options=pedal_names,
       -- actions are set up during construction in _add_param_actions
     })
+    -- We're primarily hiding these because this page's UI enforces certain ways to change the board,
+    -- while editing via params directly removes some of those restrictions in ways that are difficult to handle
+    -- (e.g., putting EMPTY_PEDAL between other pedals, selecting the same pedal twice, etc.))
+    -- TODO: figure out why norns/lua/core/paramset:hide doesn't lookup string param_ids for hiding properly
+    params:hide(params.lookup[param_id])
   end
 
   -- Tell each pedal type to set up its params
