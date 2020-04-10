@@ -11,14 +11,18 @@ SustainPedal : Pedal {
     wet = HPF.ar(wet, 25);
 
     // Then into a noise gate
-    gate = LinExp.kr(\gate.kr(0.5), 0, 1, 0.001, 0.05);
-    wet = Compander.ar(wet, wet, gate, 10, 1, 0.01, 0.01);
+    gate = \gate.kr(0.5);
+    gate = Select.kr(gate > 0.5, [
+      LinExp.kr(gate, 0, 0.5, 0.0001, 0.00075),
+      LinExp.kr(gate, 0.5, 1, 0.00075, 0.05),
+    ]);
+    wet = Compander.ar(wet, wet, gate, 6, 1, 0.1, 0.01);
 
     // Then we feed into a sustainer
     drive = \drive.kr(0.5);
     ratio = LinExp.kr(drive, 0, 1, 0.8, 0.1);
     threshold = LinLin.kr(drive, 0, 1, 0, 1);
-    wet = Compander.ar(wet, wet, threshold, ratio, 1, \attack.kr(0.01), \release.kr(0.01));
+    wet = CompanderD.ar(wet, threshold, ratio, 1, \attack.kr(0.01), \release.kr(0.01)).softclip;
 
     // Then we feed into the Tone section
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
