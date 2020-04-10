@@ -18,7 +18,7 @@ function ReverbPedal:new()
     Pedal._default_section(),
   }
   i.dial_size = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
-  i.dial_decay = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  i.dial_decay = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_size, i.dial_decay}, {i.dial_tone}},

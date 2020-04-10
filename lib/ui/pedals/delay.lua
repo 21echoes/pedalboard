@@ -19,7 +19,7 @@ function DelayPedal:new()
   }
   i.dial_time = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   -- TODO: this should be a label
-  i.dial_mode = UI.Dial.new(34.5, 27, 22, 0, 0, 1, 1)
+  i.dial_mode = UI.Dial.new(34.5, 25, 22, 0, 0, 1, 1)
   i.dial_feedback = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_time, i.dial_mode},  {i.dial_feedback}},

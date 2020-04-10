@@ -18,9 +18,9 @@ function FlangerPedal:new()
     Pedal._default_section(),
   }
   i.dial_rate = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
-  i.dial_depth = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  i.dial_depth = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_feedback = UI.Dial.new(72, 12, 22, 50, 0, 100, 1)
-  i.dial_predelay = UI.Dial.new(97, 27, 22, 50, 0, 100, 1)
+  i.dial_predelay = UI.Dial.new(97, 25, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_rate, i.dial_depth}, {i.dial_feedback, i.dial_predelay}},
     Pedal._default_dials(),

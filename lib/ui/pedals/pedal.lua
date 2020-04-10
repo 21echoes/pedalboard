@@ -22,7 +22,7 @@ function Pedal:new(i)
   --   Pedal._default_section(),
   -- }
   -- i.dial_size = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
-  -- i.dial_decay = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  -- i.dial_decay = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   -- i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   -- i.dials = {
   --   {{i.dial_size, i.dial_decay}, {i.dial_tone}},
@@ -60,9 +60,9 @@ function Pedal._default_dials()
   -- TODO: helpers for dial positioning logic & etc
   -- TODO: consider making bypass always an on/off label
   local dial_bypass = UI.Dial.new(9, 12, 22, 0, 0, 1, 1)
-  local dial_mix = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  local dial_mix = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   local dial_in_gain = UI.Dial.new(72, 12, 22, 0, -60, 12, 1, 0, {0})
-  local dial_out_gain = UI.Dial.new(97, 27, 22, 0, -60, 12, 1, 0, {0})
+  local dial_out_gain = UI.Dial.new(97, 25, 22, 0, -60, 12, 1, 0, {0})
   return {{dial_bypass, dial_mix}, {dial_in_gain, dial_out_gain}}
 end
 

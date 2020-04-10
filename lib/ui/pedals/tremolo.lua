@@ -19,7 +19,7 @@ function TremoloPedal:new()
     Pedal._default_section(),
   }
   i.dial_rate = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
-  i.dial_depth = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  i.dial_depth = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_shape = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_rate, i.dial_depth}, {i.dial_shape}},

@@ -18,7 +18,7 @@ function SustainPedal:new()
     Pedal._default_section(),
   }
   i.dial_drive = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
-  i.dial_gate = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  i.dial_gate = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_drive, i.dial_gate},  {i.dial_tone}},
