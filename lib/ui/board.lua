@@ -3,6 +3,7 @@
 
 local UI = require "ui"
 local tabutil = require "tabutil"
+local ScreenState = include("lib/ui/screen_state")
 
 -- All possible pedals, ordered by something like how common they are
 local pedal_classes = {
@@ -32,8 +33,7 @@ function Board:new(
   insert_page_at_index,
   remove_page,
   swap_page,
-  set_page_index,
-  mark_screen_dirty
+  set_page_index
 )
   local i = {}
   setmetatable(i, self)
@@ -45,7 +45,6 @@ function Board:new(
   i._remove_page = remove_page
   i._swap_page = swap_page
   i._set_page_index = set_page_index
-  i._mark_screen_dirty = mark_screen_dirty
   i._manual_action_will_require_param_sync = false
   i._is_syncing_to_params = false
 
@@ -275,7 +274,6 @@ function Board:cleanup()
   self._remove_page = nil
   self._swap_page = nil
   self._set_page_index = nil
-  self._mark_screen_dirty = nil
 end
 
 function Board:_setup_tabs()
@@ -496,6 +494,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   pedal_class = pedal_classes[pedal_class_index]
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
+    -- pedal instantiation
     local pedal_instance = pedal_class:new()
     engine.add_pedal(pedal_instance.id)
     table.insert(self.pedals, pedal_instance)
@@ -507,6 +506,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     if pedal_class.__index == self.pedals[slot].__index then
       return
     end
+    -- pedal instantiation
     local pedal_instance = pedal_class:new()
     -- The engine is zero-indexed
     local engine_index = slot - 1
@@ -516,7 +516,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     self._swap_page(page_index, pedal_instance)
   end
   self._set_page_index(page_index)
-  self._mark_screen_dirty(true)
+  ScreenState.mark_screen_dirty(true)
 end
 
 function Board:_sync_pedals_to_params(force)

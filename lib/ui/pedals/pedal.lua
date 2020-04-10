@@ -3,6 +3,7 @@
 
 local UI = require "ui"
 local Controlspecs = include("lib/ui/pedals/controlspecs")
+local ScreenState = include("lib/ui/screen_state")
 
 local Pedal = {}
 Pedal.id = "pedal"
@@ -124,7 +125,9 @@ function Pedal:_add_param_actions()
   for section_index, section in ipairs(self._param_ids) do
     for tab_index, tab in ipairs(section) do
       for param_index, param_id in ipairs(tab) do
-        params:set_action(param_id, function(value) self:_set_value_from_param_value(param_id, value) end)
+        params:set_action(param_id, function(value)
+          self:_set_value_from_param_value(param_id, value)
+        end)
       end
     end
   end
@@ -248,6 +251,7 @@ function Pedal:_set_value_from_param_value(param_id, value)
     self.tab_mix_dial:set_value(coerced_value)
   end
   self._param_id_to_dials[param_id]:set_value(coerced_value)
+  ScreenState.mark_screen_dirty(true)
 
   if param_id == self.id .. "_bypass" then
     engine[self.id .. "_bypass"](coerced_value)

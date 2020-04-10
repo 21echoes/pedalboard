@@ -21,6 +21,7 @@ engine.name = "Pedalboard"
 local UI = require "ui"
 local encoders = require "encoders"
 local Board = include("lib/ui/board")
+local ScreenState = include("lib/ui/screen_state")
 
 -- Pages UI management
 local pages
@@ -29,7 +30,6 @@ local pages_table
 -- Variables for the render loop
 local SCREEN_FRAMERATE = 15
 local screen_refresh_metro
-local screen_dirty = true
 
 function init()
   -- Setup our overall rendering style
@@ -54,8 +54,7 @@ function init()
     insert_page_at_index,
     remove_page,
     swap_page,
-    set_page_index,
-    mark_screen_dirty
+    set_page_index
   )}
   pages = UI.Pages.new(1, #pages_table)
 
@@ -71,8 +70,8 @@ end
 -- Interactions
 function key(n, z)
   -- All key presses are routed to the current page's class.
-  -- We also provide callbacks for children modifying our state
   screen_dirty = current_page():key(n, z)
+  ScreenState.mark_screen_dirty(screen_dirty)
 end
 
 function enc(n, delta)
@@ -81,17 +80,18 @@ function enc(n, delta)
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
     _set_encoder_sensitivities()
     current_page():enter()
-    screen_dirty = true
+    ScreenState.mark_screen_dirty(true)
   else
     -- Other encoders are routed to the current page's class
     screen_dirty = current_page():enc(n, delta)
+    ScreenState.mark_screen_dirty(screen_dirty)
   end
 end
 
 -- Render
 function render_loop()
-  if screen_dirty then
-    screen_dirty = false
+  if ScreenState.is_screen_dirty() then
+    ScreenState.mark_screen_dirty(false)
     redraw()
   end
 end
@@ -129,34 +129,30 @@ function set_page_index(new_page_index)
   pages:set_index(new_page_index)
   current_page():enter()
   _set_encoder_sensitivities()
-  screen_dirty = true
+  ScreenState.mark_screen_dirty(true)
 end
 
 function add_page(page_instance)
   table.insert(pages_table, page_instance)
   pages = UI.Pages.new(1, #pages_table)
-  screen_dirty = true
+  ScreenState.mark_screen_dirty(true)
 end
 
 function insert_page_at_index(index, page_instance)
   table.insert(pages_table, index, page_instance)
   pages = UI.Pages.new(1, #pages_table)
-  screen_dirty = true
+  ScreenState.mark_screen_dirty(true)
 end
 
 function remove_page(index)
   table.remove(pages_table, index)
   pages = UI.Pages.new(1, #pages_table)
-  screen_dirty = true
+  ScreenState.mark_screen_dirty(true)
 end
 
 function swap_page(index, page_instance)
   pages_table[index] = page_instance
-  screen_dirty = true
-end
-
-function mark_screen_dirty(is_screen_dirty)
-  screen_dirty = is_screen_dirty
+  ScreenState.mark_screen_dirty(true)
 end
 
 function _set_encoder_sensitivities()
