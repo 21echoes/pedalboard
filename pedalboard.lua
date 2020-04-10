@@ -15,7 +15,7 @@
 -- E2 / E3 change dial values
 -- K2 / K3 cycle thru dial pairs
 --
--- v0.9.0 @21echoes
+-- v0.9.1 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
