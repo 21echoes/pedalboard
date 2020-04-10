@@ -59,10 +59,10 @@ end
 function Pedal._default_dials()
   -- TODO: helpers for dial positioning logic & etc
   -- TODO: consider making bypass always an on/off label
-  dial_bypass = UI.Dial.new(9, 12, 22, 0, 0, 1, 1)
-  dial_mix = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
-  dial_in_gain = UI.Dial.new(72, 12, 22, 0, -60, 12, 1, 0, {0})
-  dial_out_gain = UI.Dial.new(97, 27, 22, 0, -60, 12, 1, 0, {0})
+  local dial_bypass = UI.Dial.new(9, 12, 22, 0, 0, 1, 1)
+  local dial_mix = UI.Dial.new(34.5, 27, 22, 50, 0, 100, 1)
+  local dial_in_gain = UI.Dial.new(72, 12, 22, 0, -60, 12, 1, 0, {0})
+  local dial_out_gain = UI.Dial.new(97, 27, 22, 0, -60, 12, 1, 0, {0})
   return {{dial_bypass, dial_mix}, {dial_in_gain, dial_out_gain}}
 end
 
@@ -83,7 +83,7 @@ function Pedal:_complete_initialization()
 end
 
 function Pedal._add_default_params(id_prefix)
-  bypass_id = id_prefix .. "_bypass"
+  local bypass_id = id_prefix .. "_bypass"
   params:add({
     id = bypass_id,
     name = "Bypass",
@@ -91,7 +91,7 @@ function Pedal._add_default_params(id_prefix)
     options = {"Effect Enabled", "Bypassed"},
   })
 
-  mix_id = id_prefix .. "_mix"
+  local mix_id = id_prefix .. "_mix"
   params:add({
     id = mix_id,
     name = "Dry/Wet",
@@ -99,7 +99,7 @@ function Pedal._add_default_params(id_prefix)
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
   })
 
-  in_gain_id = id_prefix .. "_in_gain"
+  local in_gain_id = id_prefix .. "_in_gain"
   params:add({
     id = in_gain_id,
     name = "In Gain",
@@ -107,7 +107,7 @@ function Pedal._add_default_params(id_prefix)
     controlspec = Controlspecs.CONTROL_SPEC_GAIN,
   })
 
-  out_gain_id = id_prefix .. "_out_gain"
+  local out_gain_id = id_prefix .. "_out_gain"
   params:add({
     id = out_gain_id,
     name = "Out Gain",
@@ -141,6 +141,7 @@ function Pedal:key(n, z)
   end
 
   -- Change the focused tab
+  local direction = 0
   if n == 2 then
     direction = -1
   elseif n == 3 then
@@ -168,8 +169,14 @@ end
 
 function Pedal:enc(n, delta)
   -- Change the value of a focused dial
-  dial_index = n - 1
-  param_id = self._param_ids[self.section_index][self.tabs.index][dial_index]
+  local param_id = nil
+  -- If there's only one dial, always use it
+  if #self._param_ids[self.section_index][self.tabs.index] == 1 then
+    param_id = self._param_ids[self.section_index][self.tabs.index][1]
+  else
+    local dial_index = n - 1
+    param_id = self._param_ids[self.section_index][self.tabs.index][dial_index]
+  end
   if param_id == nil then
     return false
   end
@@ -205,9 +212,8 @@ function Pedal:redraw()
 end
 
 function Pedal:render_as_tab(offset, width, is_active)
-  center_x = offset + (width / 2)
-  tab_mix_dial_value = self.tab_mix_dial.value
-  self.tab_mix_dial = UI.Dial.new(center_x - 11, 16, 22, tab_mix_dial_value, 0, 100, 1)
+  local center_x = offset + (width / 2)
+  self.tab_mix_dial = UI.Dial.new(center_x - 11, 16, 22, self.tab_mix_dial.value, 0, 100, 1)
   self.tab_mix_dial.active = is_active
   self.tab_mix_dial:redraw()
   if self.tab_bypass_label == "ON" then
@@ -223,8 +229,8 @@ function Pedal:render_as_tab(offset, width, is_active)
 end
 
 function Pedal:toggle_bypass()
-  bypass_param_id = self.id .. "_bypass"
-  is_currently_bypassed = params:get(bypass_param_id) == 2
+  local bypass_param_id = self.id .. "_bypass"
+  local is_currently_bypassed = params:get(bypass_param_id) == 2
   params:set(bypass_param_id, is_currently_bypassed and 1 or 2)
 end
 
@@ -233,7 +239,7 @@ function Pedal:scroll_mix(delta)
 end
 
 function Pedal:_set_value_from_param_value(param_id, value)
-  coerced_value = value
+  local coerced_value = value
   if param_id == self.id .. "_bypass" then
     -- The options are 1-indexed, but the bypass control expects 0 or 1
     coerced_value = value - 1
@@ -261,10 +267,9 @@ function Pedal:_update_section()
 end
 
 function Pedal:_update_active_dials()
-  current_tab_index = self.tabs.index
   for tab_index, tab in ipairs(self.dials[self.section_index]) do
     for dial_index, dial in ipairs(tab) do
-      dial.active = tab_index == current_tab_index
+      dial.active = tab_index == self.tabs.index
     end
   end
 end
