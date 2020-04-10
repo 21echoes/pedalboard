@@ -60,6 +60,19 @@ function Board:new(
 end
 
 function Board:add_params()
+  params:add({
+    id="num_input_channels",
+    name="Input Mode",
+    type="option",
+    options={"Mono", "Stereo"},
+    default=2,
+    action=function(value)
+      local coerced_value = value
+      if value == "Stereo" then coerced_value = 2 elseif value == "Mono" then coerced_value = 1 end
+      engine.set_num_input_channels(coerced_value)
+    end
+  })
+
   -- Don't add the group, as for now we're just hiding these params
   -- params:add_group("Board", MAX_SLOTS)
   for i = 1, MAX_SLOTS do

@@ -5,6 +5,7 @@ Engine_Pedalboard : CroneEngine {
   var pedalDetails;
   var buses;
   var passThru;
+  var numInputChannels = 2;
 
   *new { arg context, doneCallback;
     ^super.new(context, doneCallback);
@@ -55,6 +56,7 @@ Engine_Pedalboard : CroneEngine {
     this.addCommand("insert_pedal_at_index", "is", {|msg| this.insertPedalAtIndex(msg[1], msg[2]);});
     this.addCommand("remove_pedal_at_index", "i", {|msg| this.removePedalAtIndex(msg[1]);});
     this.addCommand("swap_pedal_at_index", "is", {|msg| this.swapPedalAtIndex(msg[1], msg[2]);});
+    this.addCommand("set_num_input_channels", "i", {|msg| this.setNumInputChannels(msg[1]);});
 
     this.buildNoPedalState;
 
@@ -63,8 +65,8 @@ Engine_Pedalboard : CroneEngine {
 
   buildNoPedalState {
     passThru = Synth.new(\passThru, [
-      \inL, context.in_b[0].index,
-      \inR, context.in_b[1].index,
+      \inL, this.getInL,
+      \inR, this.getInR,
       \out, context.out_b.index,
     ], context.xg);
   }
@@ -77,8 +79,8 @@ Engine_Pedalboard : CroneEngine {
     var inL, inR, out, target, addAction;
     if (index == 0, {
       // The first pedal always has the main ins as its inputs, and is added to the head of the group
-      inL = context.in_b[0].index;
-      inR = context.in_b[1].index;
+      inL = this.getInL;
+      inR = this.getInR;
       target = context.xg;
       addAction = \addToHead;
     });
@@ -140,7 +142,7 @@ Engine_Pedalboard : CroneEngine {
     }, {
       if (index == 0, {
         var nextPedal = pedalDetails[boardIds[index + 1]][\synth];
-        nextPedal.set(\inL, context.in_b[0].index, \inR, context.in_b[1].index);
+        nextPedal.set(\inL, this.getInL, \inR, this.getInR);
         buses[index].free;
         buses.removeAt(index);
       }, {
@@ -162,6 +164,28 @@ Engine_Pedalboard : CroneEngine {
   swapPedalAtIndex {|index, newPedalId|
     this.removePedalAtIndex(index);
     this.insertPedalAtIndex(index, newPedalId);
+  }
+
+  setNumInputChannels{|numChannelsArg|
+    numInputChannels = numChannelsArg;
+    if (boardIds.size == 0, {
+      passThru.set(\inL, this.getInL, \inR, this.getInR);
+    }, {
+      var firstPedal = pedalDetails[boardIds[0]][\synth];
+      firstPedal.set(\inL, this.getInL, \inR, this.getInR);
+    });
+  }
+
+  getInL {
+    ^context.in_b[0].index;
+  }
+
+  getInR {
+    if (numInputChannels == 1, {
+      ^context.in_b[0].index;
+    }, {
+      ^context.in_b[1].index;
+    });
   }
 
   free {
