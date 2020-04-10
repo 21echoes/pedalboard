@@ -8,20 +8,20 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local ChorusPedal = Pedal:new()
 ChorusPedal.id = "chorus"
 
-function ChorusPedal:new()
-  local i = Pedal:new()
+function ChorusPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Rate & Depth"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_rate = UI.Dial.new(22, 19.5, 22, 50, 0, 100, 1)
   i.dial_depth = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_rate, i.dial_depth}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

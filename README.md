@@ -28,6 +28,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * K2 + E2 re-orders pedals
 * K2 + E3 changes wet/dry for focused pedal
 * K2 + K3 toggles bypass for focused pedal
+* K2 + K3 when adding or changing a pedal puts the new pedal in bypass by default
 
 ### Other Pages: the Pedals
 ![board](screenshots/pedal.png)

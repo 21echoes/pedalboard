@@ -8,14 +8,14 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local FlangerPedal = Pedal:new()
 FlangerPedal.id = "flanger"
 
-function FlangerPedal:new()
-  local i = Pedal:new()
+function FlangerPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Rate & Depth", "Fdbk & Delay"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_rate = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   i.dial_depth = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
@@ -23,7 +23,7 @@ function FlangerPedal:new()
   i.dial_predelay = UI.Dial.new(97, 25, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_rate, i.dial_depth}, {i.dial_feedback, i.dial_predelay}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

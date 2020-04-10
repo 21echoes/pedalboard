@@ -8,14 +8,14 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local DelayPedal = Pedal:new()
 DelayPedal.id = "delay"
 
-function DelayPedal:new()
-  local i = Pedal:new()
+function DelayPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Time & Mode", "Feedback"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_time = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   -- TODO: this should be a label
@@ -23,7 +23,7 @@ function DelayPedal:new()
   i.dial_feedback = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_time, i.dial_mode},  {i.dial_feedback}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

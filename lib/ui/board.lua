@@ -45,13 +45,14 @@ function Board:new(
   i._remove_page = remove_page
   i._swap_page = swap_page
   i._set_page_index = set_page_index
-  i._manual_action_will_require_param_sync = false
-  i._is_syncing_to_params = false
 
   i.pedals = {}
   i._pending_pedal_class_index = 0
+  i._manual_action_will_require_param_sync = false
+  i._is_syncing_to_params = false
   i._alt_key_down_time = nil
   i._alt_action_taken = false
+  i._add_bypassed = false
   i:_setup_tabs()
   i:_add_param_actions()
 
@@ -103,13 +104,12 @@ function Board:key(n, z)
     -- Key down on K2 enables alt mode
     if z == 1 then
       -- Alt mode is meaningless on the new slot
-      if self:_is_new_slot(self.tabs.index) then
-        return false
-      end
       self._alt_key_down_time = util.time()
-      -- Record what tab we started on for our K2+E2 pedal reordering feature
-      self._reorder_source = self.tabs.index
-      self._reorder_destination = self.tabs.index
+      -- Record what tab we started on for our K2+E2 pedal reordering feature (ignoring the new slot)
+      if not self:_is_new_slot(self.tabs.index) then
+        self._reorder_source = self.tabs.index
+        self._reorder_destination = self.tabs.index
+      end
       return false
     end
 
@@ -145,14 +145,24 @@ function Board:key(n, z)
       return false
     end
 
+    local add_or_switch = self:_is_new_slot(self.tabs.index) or self:_slot_has_pending_switch(self.tabs.index)
+
     -- Alt+K3 means toggle bypass on current pedal
-    if self:_is_alt_mode() then
+    if self:_is_alt_mode() and not self:_is_new_slot(self.tabs.index) and not add_or_switch then
       self.pedals[self.tabs.index]:toggle_bypass()
       self._alt_action_taken = true
       return true
     end
 
     local param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
+    -- If we are in alt mode when adding or swapping a pedal, we want to make the new pedal already bypassed
+    self._add_bypassed = false
+    if self:_is_alt_mode() and param_value ~= 1 then
+      self._add_bypassed = true
+      -- In some sense an alt-action was taken, but we're going to turn off alt mode immediately here anyway
+      self._alt_action_taken = false
+      self._alt_key_down_time = nil
+    end
 
     -- We're on the "New?" slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
@@ -178,13 +188,16 @@ function Board:enc(n, delta)
   if n == 2 then
     -- Alt+E2 re-orders pedals
     if self:_is_alt_mode() then
+      -- Alt+E2 doesn't do anything on the New slot
+      if self:_is_new_slot(self.tabs.index) then
+        return false
+      end
       self._alt_action_taken = true
       local direction = util.clamp(delta, -1, 1)
       self._reorder_destination = util.clamp(self._reorder_destination + direction, 1, #self.pedals)
       self:_setup_tabs()
       return true
     end
-
 
     -- Change which pedal slot is focused
     self.tabs:set_index_delta(util.clamp(delta, -1, 1), false)
@@ -193,6 +206,10 @@ function Board:enc(n, delta)
   elseif n == 3 then
     -- Alt+E3 changes wet/dry
     if self:_is_alt_mode() then
+      -- Alt+E3 doesn't do anything on the New slot
+      if self:_is_new_slot(self.tabs.index) then
+        return false
+      end
       self.pedals[self.tabs.index]:scroll_mix(delta)
       self._alt_action_taken = true
       return true
@@ -495,7 +512,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
     -- pedal instantiation
-    local pedal_instance = pedal_class:new()
+    local pedal_instance = pedal_class:new(self._add_bypassed)
     engine.add_pedal(pedal_instance.id)
     table.insert(self.pedals, pedal_instance)
     self:_setup_tabs()
@@ -507,7 +524,7 @@ function Board:_set_pedal_by_index(slot, name_index)
       return
     end
     -- pedal instantiation
-    local pedal_instance = pedal_class:new()
+    local pedal_instance = pedal_class:new(self._add_bypassed)
     -- The engine is zero-indexed
     local engine_index = slot - 1
     engine.swap_pedal_at_index(engine_index, pedal_instance.id)
@@ -515,6 +532,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     self:_setup_tabs()
     self._swap_page(page_index, pedal_instance)
   end
+  self._add_bypassed = false
   self._set_page_index(page_index)
   ScreenState.mark_screen_dirty(true)
 end

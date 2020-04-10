@@ -8,21 +8,21 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local SustainPedal = Pedal:new()
 SustainPedal.id = "sustain"
 
-function SustainPedal:new()
-  local i = Pedal:new()
+function SustainPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Drive & Gate", "Tone"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_drive = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   i.dial_gate = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_drive, i.dial_gate},  {i.dial_tone}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

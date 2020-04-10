@@ -8,26 +8,27 @@ local ScreenState = include("lib/ui/screen_state")
 local Pedal = {}
 Pedal.id = "pedal"
 
-function Pedal:new(i)
-  i = i or {}
+function Pedal:new(bypass_by_default)
+  i = {}
   setmetatable(i, self)
   self.__index = self
   -- SUBCLASS: must set the pedal ID, e.g. self.id = "reverb"
 
   i.section_index = 1;
   i.tab_bypass_label = ""
+  i.bypass_by_default = bypass_by_default
   i.tab_mix_dial = UI.Dial.new(0, 12, 22, 50, 0, 100, 1)
   -- SUBCLASS: must define sections and dials, e.g.:
   -- i.sections = {
   --   {"Size & Decay", "Tone"},
-  --   Pedal._default_section(),
+  --   i:_default_section(),
   -- }
   -- i.dial_size = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   -- i.dial_decay = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   -- i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   -- i.dials = {
   --   {{i.dial_size, i.dial_decay}, {i.dial_tone}},
-  --   Pedal._default_dials(),
+  --   i:_default_dials(),
   -- }
 
   -- SUBCLASS: must call this to complete setup
@@ -53,14 +54,15 @@ end
 
 -- Inner implementation, called by subclasses
 
-function Pedal._default_section()
+function Pedal:_default_section()
   return {"Bypass & Mix", "In & Out Gains"}
 end
 
-function Pedal._default_dials()
+function Pedal:_default_dials()
   -- TODO: helpers for dial positioning logic & etc
   -- TODO: consider making bypass always an on/off label
-  local dial_bypass = UI.Dial.new(9, 12, 22, 0, 0, 1, 1)
+  local default_bypass_value = self.bypass_by_default and 1 or 0
+  local dial_bypass = UI.Dial.new(9, 12, 22, default_bypass_value, 0, 1, 1)
   local dial_mix = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   local dial_in_gain = UI.Dial.new(72, 12, 22, 0, -60, 12, 1, 0, {0})
   local dial_out_gain = UI.Dial.new(97, 25, 22, 0, -60, 12, 1, 0, {0})
@@ -76,7 +78,12 @@ function Pedal:_complete_initialization()
       for param_index, param_id in ipairs(tab) do
         dial = self.dials[section_index][tab_index][param_index]
         self._param_id_to_dials[param_id] = dial
-        self:_set_value_from_param_value(param_id, params:get(param_id))
+        local param_value = params:get(param_id)
+        if param_id == self.id .. "_bypass" then
+          param_value = self.bypass_by_default and 2 or 1
+          params:set(param_id, param_value)
+        end
+        self:_set_value_from_param_value(param_id, param_value)
       end
     end
   end

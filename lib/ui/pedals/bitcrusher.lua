@@ -9,14 +9,14 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local BitcrusherPedal = Pedal:new()
 BitcrusherPedal.id = "bitcrusher"
 
-function BitcrusherPedal:new()
-  local i = Pedal:new()
+function BitcrusherPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Bits & Samples", "Tone & Gate"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_bitrate = UI.Dial.new(9, 12, 22, 12, 4, 16, 0.25)
   i.dial_samplerate = UI.Dial.new(34.5, 25, 22, 48000, 1000, 48000, 1000)
@@ -24,7 +24,7 @@ function BitcrusherPedal:new()
   i.dial_gate = UI.Dial.new(97, 25, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_bitrate, i.dial_samplerate}, {i.dial_tone, i.dial_gate}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

@@ -8,21 +8,21 @@ local Controlspecs = include("lib/ui/pedals/controlspecs")
 local ReverbPedal = Pedal:new()
 ReverbPedal.id = "reverb"
 
-function ReverbPedal:new()
-  local i = Pedal:new()
+function ReverbPedal:new(bypass_by_default)
+  local i = Pedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
   i.sections = {
     {"Size & Decay", "Tone"},
-    Pedal._default_section(),
+    i:_default_section(),
   }
   i.dial_size = UI.Dial.new(9, 12, 22, 50, 0, 100, 1)
   i.dial_decay = UI.Dial.new(34.5, 25, 22, 50, 0, 100, 1)
   i.dial_tone = UI.Dial.new(84.5, 19.5, 22, 50, 0, 100, 1)
   i.dials = {
     {{i.dial_size, i.dial_decay}, {i.dial_tone}},
-    Pedal._default_dials(),
+    i:_default_dials(),
   }
   i:_complete_initialization()
 

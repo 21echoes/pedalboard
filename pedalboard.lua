@@ -10,6 +10,8 @@
 -- K2 + E2 re-orders pedals
 -- K2 + E3 changes wet/dry
 -- K2 + K3 toggles bypass
+-- When adding/changing pedals,
+--  K2+K3 defaults to bypassed
 --
 -- Pedal Pages
 -- E2 / E3 change dial values
