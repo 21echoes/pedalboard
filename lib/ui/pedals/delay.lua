@@ -15,7 +15,7 @@ function DelayPedal:new(bypass_by_default)
   self.__index = self
 
   i.sections = {
-    {"Time & Mode", "Feedback"},
+    {"Time & Fdbk", "Quality & Mode"},
     i:_default_section(),
   }
   i:_complete_initialization()
@@ -43,6 +43,12 @@ function DelayPedal.params()
     type = "control",
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
   }
+  local quality_control = {
+    id = id_prefix .. "_quality",
+    name = "Quality",
+    type = "option",
+    options = {"Digital", "Analog", "Tape", "Lo-Fi"},
+  }
   local mode_control = {
     id = id_prefix .. "_mode",
     name = "Mode",
@@ -51,7 +57,7 @@ function DelayPedal.params()
   }
 
   return {
-    {{time_control, feedback_control}, {mode_control}},
+    {{time_control, feedback_control}, {quality_control, mode_control}},
     Pedal._default_params(id_prefix)
   }
 end

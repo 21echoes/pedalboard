@@ -65,7 +65,6 @@ A simple collection of chainable effects for the Norns sound computer.
 
 ### Better Pedals!
 * Add Shimmer to the Reverb pedal
-* Add Tape/Lo-Fi to the Delay Pedal
 * Add Tap Tempo (hold K2 and tap K3) to the Delay and Tremolo pedals
 * Continued iteration on how the dials alter the effect
   * Covering musical ranges with multiple sweet spots, while also offering interesting extremes
