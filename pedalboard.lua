@@ -41,7 +41,7 @@ function init()
 
   -- Set up params (delegate to the Board class)
   params:add_separator("Pedalboard")
-  Board.add_params()
+  Board:add_params()
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.

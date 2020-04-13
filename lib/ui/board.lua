@@ -93,7 +93,7 @@ function Board:add_params()
 
   -- Tell each pedal type to set up its params
   for i, pedal_class in ipairs(pedal_classes) do
-    pedal_class.add_params()
+    pedal_class:add_params()
   end
 end
 

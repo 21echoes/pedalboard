@@ -37,7 +37,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * K2 cycles left thru dial pairs, moving left a section or looping at the left edge
 * K3 cycles right thru dial pairs, moving right a section or looping at the right edge
 * Every pedal has the following dials as its last 4:
-  * Bypass (as a dial -- any left motion toggles off, any right motion toggles on)
+  * Bypass
   * Wet/dry
   * In gain
   * Out gain
@@ -69,7 +69,6 @@ A simple collection of chainable effects for the Norns sound computer.
 * Add Tap Tempo (hold K2 and tap K3) to the Delay and Tremolo pedals
 * Continued iteration on how the dials alter the effect
   * Covering musical ranges with multiple sweet spots, while also offering interesting extremes
-* Bypass should be a label, not a dial
 
 ### A System of Simple and Fine Control
 * Pedals should be able to have more parameters, beyond the meta-controls in their main UI
