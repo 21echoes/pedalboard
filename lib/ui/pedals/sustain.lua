@@ -3,7 +3,7 @@
 
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
-local Controlspecs = include("lib/ui/pedals/controlspecs")
+local Controlspecs = include("lib/ui/util/controlspecs")
 
 local SustainPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id

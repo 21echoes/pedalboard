@@ -25,7 +25,7 @@ engine.name = "Pedalboard"
 local UI = require "ui"
 local encoders = require "encoders"
 local Board = include("lib/ui/board")
-local ScreenState = include("lib/ui/screen_state")
+local ScreenState = include("lib/ui/util/screen_state")
 
 -- Pages UI management
 local pages

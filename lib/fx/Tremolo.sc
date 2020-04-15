@@ -1,16 +1,12 @@
 TremoloPedal : Pedal {
   *id { ^\tremolo; }
 
-  *fxArguments { ^[\rate, \depth, \shape]; }
+  *fxArguments { ^[\time, \depth, \shape]; }
 
   *fxDef {^{|wet|
-    var inputRate, rate, depth, ampMod,
+    var rate, depth, ampMod,
     shape, sinMix, triMix, sawMix, sqrMix, wavetableGainOffset;
-    inputRate = \rate.kr(0.5);
-    rate = Select.kr(inputRate < 0.5, [
-      LinLin.kr(inputRate, 0.5, 1, 5, 20),
-      LinExp.kr(inputRate, 0, 0.5, 0.5, 5)
-    ]);
+    rate = (\time.kr(0.5) - ControlRate.ir.reciprocal).reciprocal;
     // Unipolar from 1 down to at most zero (controlled by depth)
     depth = LinLin.kr(\depth.kr(0.5), 0, 1, 0, 0.5);
 

@@ -2,9 +2,9 @@
 -- @classmod Pedal
 
 local UI = require "ui"
-local Controlspecs = include("lib/ui/pedals/controlspecs")
-local ScreenState = include("lib/ui/screen_state")
-local Label = include("lib/ui/label")
+local Controlspecs = include("lib/ui/util/controlspecs")
+local ScreenState = include("lib/ui/util/screen_state")
+local Label = include("lib/ui/util/label")
 
 local Pedal = {}
 Pedal.id = "pedal"

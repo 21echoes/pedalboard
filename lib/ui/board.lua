@@ -3,7 +3,7 @@
 
 local UI = require "ui"
 local tabutil = require "tabutil"
-local ScreenState = include("lib/ui/screen_state")
+local ScreenState = include("lib/ui/util/screen_state")
 
 -- All possible pedals, ordered by something like how common they are
 local pedal_classes = {
