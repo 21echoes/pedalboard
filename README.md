@@ -41,10 +41,11 @@ A simple collection of chainable effects for the Norns sound computer.
   * Wet/dry
   * In gain
   * Out gain
+* On pedals with tap-tempo (currently just Delay), hold K2 and tap K3 for tap tempo
 
 ## Requirements
 * norns (200328 or later)
-* Audio in (stereo preferred)
+* Audio in (stereo preferred, mono mode available in params)
 * Reset after install (this is a new Engine)
 
 ## Roadmap
@@ -62,10 +63,11 @@ A simple collection of chainable effects for the Norns sound computer.
 * Auto-Wah (params: Depth, Rate, Sensitivity, Mode)
 * Tuner (params: Note, Hear?)
   * Also: different display, e.g. label "A3 (220 Hz)" with a VU-meter-style graph showing how close you are
+* Eventually: Filter, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
 
 ### Better Pedals!
 * Add Shimmer to the Reverb pedal
-* Add Tap Tempo (hold K2 and tap K3) to the Delay and Tremolo pedals
+* Add Tap Tempo (hold K2 and tap K3) to the Tremolo pedal
 * Continued iteration on how the dials alter the effect
   * Covering musical ranges with multiple sweet spots, while also offering interesting extremes
 

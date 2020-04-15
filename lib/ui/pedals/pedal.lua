@@ -316,7 +316,7 @@ function Pedal:_position_for_widget(section_index, tab_index, widget_index, widg
         end
       else
         if other_is_dial then
-          x, y = 32, 53
+          x, y = 32, 52
         else
           x, y = 32, 46
         end

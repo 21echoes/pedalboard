@@ -14,8 +14,8 @@ DelayPedal : Pedal {
     feedbackBuses = Array.fill(numChannels, {Bus.audio(context.server, 1)});
     // The feedback loop introduces an additional ControlRate.ir.reciprocal delay,
     // so reduce our delay time by that amount to compensate
-    time = LinExp.kr(\time.kr(0.5, 0.1), 0, 1, 0.03, maxDelay) - ControlRate.ir.reciprocal;
-    changeDetector = Changed.kr(time);
+    time = \time.kr(0.5) - ControlRate.ir.reciprocal;
+    changeDetector = Changed.kr(Lag.kr(time, 0.2));
     // Allow just-beyond-unity feedback
     feedback = LinLin.kr(\feedback.kr(0.5), 0, 1, 0, 1.1);
     mode = \mode.kr(0);

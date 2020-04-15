@@ -116,7 +116,6 @@ function Board:key(n, z)
   if n == 2 then
     -- Key down on K2 enables alt mode
     if z == 1 then
-      -- Alt mode is meaningless on the new slot
       self._alt_key_down_time = util.time()
       -- Record what tab we started on for our K2+E2 pedal reordering feature (ignoring the new slot)
       if not self:_is_new_slot(self.tabs.index) then
