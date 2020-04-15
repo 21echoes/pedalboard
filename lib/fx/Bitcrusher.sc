@@ -4,7 +4,7 @@ BitcrusherPedal : Pedal {
   *fxArguments { ^[\bitrate, \samplerate, \tone, \gate]; }
 
   *fxDef {^{|wet|
-    var gate, tone, freq, filterType;
+    var gate, samplerate, tone, freq, filterType;
 
     // First we feed into a HPF to filter out sub-20Hz
     wet = HPF.ar(wet, 25);
@@ -15,8 +15,11 @@ BitcrusherPedal : Pedal {
       LinExp.kr(gate, 0.5, 1, 0.015, 0.05),
     ]);
     wet = Compander.ar(wet, wet, gate, 6, 1, 0.1, 0.01);
+    // Then we LPF to prevent aliasing before bit-reducing
+    samplerate = \samplerate.kr(48000);
+    wet = LPF.ar(wet, 5.66.reciprocal * samplerate);
     // Then into a bit reducer
-    wet = Decimator.ar(wet, \samplerate.kr(48000), \bitrate.kr(12));
+    wet = Decimator.ar(wet, samplerate, \bitrate.kr(12));
 
     // Then we feed into the Tone section
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
