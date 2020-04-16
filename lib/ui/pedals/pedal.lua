@@ -59,8 +59,6 @@ function Pedal:_complete_initialization()
   self:_add_param_actions()
 end
 
--- TODO: make it so subclass doesn't call these
-
 function Pedal._default_params(id_prefix)
   local bypass_control = {
     id = id_prefix .. "_bypass",

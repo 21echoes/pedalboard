@@ -84,10 +84,14 @@ function EqualizerPedal.params()
     controlspec = ControlSpec.new(0.1, 4, "lin", 0.1, 1, ""),
   }
 
+  -- Default mix of 100%
+  local default_params = Pedal._default_params(id_prefix)
+  default_params[1][2].controlspec = Controlspecs.mix(100)
+
   return {
     {{ls_freq_control, ls_amp_control}, {hs_freq_control, hs_amp_control}},
     {{mid_freq_control, mid_amp_control}, {mid_q_control}},
-    Pedal._default_params(id_prefix),
+    default_params,
   }
 end
 

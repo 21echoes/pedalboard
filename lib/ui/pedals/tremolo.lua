@@ -62,9 +62,13 @@ function TremoloPedal.params()
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
   }
 
+  -- Default mix of 100%
+  local default_params = Pedal._default_params(id_prefix)
+  default_params[1][2].controlspec = Controlspecs.mix(100)
+
   return {
     {{bpm_control, beat_division_control}, {depth_control, shape_control}},
-    Pedal._default_params(id_prefix),
+    default_params
   }
 end
 

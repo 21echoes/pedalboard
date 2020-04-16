@@ -48,7 +48,7 @@ function ReverbPedal.params()
     id = id_prefix .. "_shimmer",
     name = "Shimmer",
     type = "control",
-    controlspec = ControlSpec.new(0, 100, "lin", 1, 0, "%"),
+    controlspec = Controlspecs.mix(0),
   }
   local tone_control = {
     id = id_prefix .. "_tone",
@@ -61,15 +61,6 @@ function ReverbPedal.params()
     {{size_control, decay_control}, {shimmer_control, tone_control}},
     Pedal._default_params(id_prefix),
   }
-end
-
-function ReverbPedal:_message_engine_for_param_change(param_id, value)
-  if param_id == self.id .. "_shimmer" then
-    -- The shimmer controlspec is custom, so it doesn't automatically get divided by 100 when sent to the engine
-    engine[param_id](value / 100.0)
-  else
-    Pedal._message_engine_for_param_change(self, param_id, value)
-  end
 end
 
 return ReverbPedal
