@@ -177,7 +177,7 @@ function Board:key(n, z)
       self._alt_key_down_time = nil
     end
 
-    -- We're on the "New?" slot, so add the pending pedal
+    -- We're on the new slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
       params:set("pedal_" .. self.tabs.index, param_value)
       return true
@@ -331,7 +331,8 @@ function Board:_setup_tabs()
   end
   -- Only add the New slot if we're not yet at the max
   if #self.pedals ~= MAX_SLOTS then
-    table.insert(tab_names, "New?")
+    local new_pedal_title = #self.pedals == 0 and "Add Pedal?" or "Add?"
+    table.insert(tab_names, new_pedal_title)
   end
   self.tabs = UI.Tabs.new(1, tab_names)
   -- If we're mid-pedal-reorder, show the reorder destination as the active tab
@@ -424,6 +425,9 @@ function Board:_name_of_pending_pedal()
   local pending_pedal_class = self:_pending_pedal_class()
   local use_short_names = self:_use_short_names()
   if pending_pedal_class == nil then
+    if #self.pedals == 0 then
+      return "E3 to choose, K3 to add"
+    end
     return use_short_names and "None" or "No Selection"
   end
   return pending_pedal_class:name(use_short_names)
