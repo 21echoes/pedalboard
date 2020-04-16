@@ -23,6 +23,8 @@ function TremoloPedal:new(bypass_by_default)
   i._tap_tempo = TapTempo.new()
   i:_complete_initialization()
   i._param_id_to_widget[i.id .. "_bpm"].units = "bpm"
+  i._param_id_to_widget[i.id .. "_shape"]:set_marker_position(1, 33)
+  i._param_id_to_widget[i.id .. "_shape"]:set_marker_position(2, 67)
 
   return i
 end

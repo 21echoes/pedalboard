@@ -19,6 +19,7 @@ function SustainPedal:new(bypass_by_default)
     i:_default_section(),
   }
   i:_complete_initialization()
+  i._param_id_to_widget[i.id .. "_tone"]:set_marker_position(1, 75)
 
   return i
 end
