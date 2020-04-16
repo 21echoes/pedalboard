@@ -118,6 +118,7 @@ function cleanup()
   board = pages_table[1]
   board:cleanup()
   for i, page in ipairs(pages_table) do
+    pages_table[i]:cleanup()
     pages_table[i] = nil
   end
   pages_table = nil
@@ -149,7 +150,8 @@ function insert_page_at_index(index, page_instance)
 end
 
 function remove_page(index)
-  table.remove(pages_table, index)
+  page = table.remove(pages_table, index)
+  page:cleanup()
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end

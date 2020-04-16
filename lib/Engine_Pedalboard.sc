@@ -24,7 +24,8 @@ Engine_Pedalboard : CroneEngine {
       OverdrivePedal,
       ReverbPedal,
       SustainPedal,
-      TremoloPedal
+      TremoloPedal,
+      TunerPedal,
     ];
     allPedalIds = List.new;
     pedalDetails = Dictionary.new;

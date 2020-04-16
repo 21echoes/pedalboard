@@ -16,7 +16,7 @@ function Pedal:new(bypass_by_default)
   -- SUBCLASS: must set the pedal ID, e.g. self.id = "reverb"
 
   i.section_index = 1;
-  i.tab_bypass_label = Label.new({center_x = 0, y = 56, level = 15, text = ""})
+  i.tab_bypass_label = Label.new({y = 56})
   i.bypass_by_default = bypass_by_default
   i.tab_mix_dial = UI.Dial.new(0, 12, 22, 50, 0, 100, 1)
 
@@ -223,6 +223,10 @@ end
 
 -- Inner implementation
 
+function Pedal:cleanup()
+  -- TODO: Any cleanup needed?
+end
+
 function Pedal:_add_param_actions()
   for section_index, section in ipairs(self._param_ids) do
     for tab_index, tab in ipairs(section) do
@@ -257,7 +261,6 @@ function Pedal:_initialize_widgets()
           widgets[section_index][tab_index][param_index] = Label.new({
             center_x = x,
             y = y,
-            level = 15,
             text = param.default or param.options[1],
           })
         end

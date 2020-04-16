@@ -18,6 +18,7 @@ local pedal_classes = {
   include("lib/ui/pedals/sustain"),
   include("lib/ui/pedals/bitcrusher"),
   include("lib/ui/pedals/equalizer"),
+  include("lib/ui/pedals/tuner"),
 }
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
