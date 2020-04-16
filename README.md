@@ -12,6 +12,8 @@ A simple collection of chainable effects for the Norns sound computer.
 * Compressor
 * Sustain
 * Bitcrusher
+* Equalizer
+* Tuner
 * More to come in future versions! File a GitHub issue with recommendations
 
 ## UI & Controls
@@ -46,7 +48,7 @@ A simple collection of chainable effects for the Norns sound computer.
 ## Requirements
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
-* Reset after install (this is a new Engine)
+* Reset after install and updates (this is a new Engine)
 
 ## Roadmap
 ### Initial Release
@@ -55,19 +57,16 @@ A simple collection of chainable effects for the Norns sound computer.
 * Then we'll film a brief demo video and post to [Lines](https://llllllll.co/)
 
 ### More Pedals!
-* EQ (params: Low Gain, Low Res, Low Freq, Mid Gain, Mid Res, Mid Freq, High Gain, High Res, High Freq)
-* Vibrato (params: Rate, Depth)
 * Pitch Shifter (params: Interval, Fine)
 * Phaser (params: Rez, Rate, Depth, Sweep?)
-* Noise Gate (params: Threshold, Release)
 * Auto-Wah (params: Depth, Rate, Sensitivity, Mode)
-* Tuner (params: Note, Hear?)
-  * Also: different display, e.g. label "A3 (220 Hz)" with a VU-meter-style graph showing how close you are
-* Eventually: Filter, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
+* Vibrato (params: Rate, Depth)
+* Eventually: Noise Gate, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
 
 ### Better Pedals!
-* Add Shimmer to the Reverb pedal
-* Add Tap Tempo (hold K2 and tap K3) to the Tremolo pedal
+* Multi-tap and Varispeed delays
+* Spring and Plate reverbs
+* EQ shelves can be filters instead, and an additional peak EQ
 * Continued iteration on how the dials alter the effect
   * Covering musical ranges with multiple sweet spots, while also offering interesting extremes
 
