@@ -1,6 +1,7 @@
 --- ReverbPedal
 -- @classmod ReverbPedal
 
+local ControlSpec = require "controlspec"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
 local Controlspecs = include("lib/ui/util/controlspecs")
@@ -15,7 +16,7 @@ function ReverbPedal:new(bypass_by_default)
   self.__index = self
 
   i.sections = {
-    {"Size & Decay", "Tone"},
+    {"Size & Decay", "Shimmer & Tone"},
     i:_default_section(),
   }
   i:_complete_initialization()
@@ -42,6 +43,12 @@ function ReverbPedal.params()
     type = "control",
     controlspec = Controlspecs.CONTROL_SPEC_MIX,
   }
+  local shimmer_control = {
+    id = id_prefix .. "_shimmer",
+    name = "Shimmer",
+    type = "control",
+    controlspec = ControlSpec.new(0, 100, "lin", 1, 0, "%"),
+  }
   local tone_control = {
     id = id_prefix .. "_tone",
     name = "Tone",
@@ -50,9 +57,18 @@ function ReverbPedal.params()
   }
 
   return {
-    {{size_control, decay_control}, {tone_control}},
+    {{size_control, decay_control}, {shimmer_control, tone_control}},
     Pedal._default_params(id_prefix),
   }
+end
+
+function ReverbPedal:_message_engine_for_param_change(param_id, value)
+  if param_id == self.id .. "_shimmer" then
+    -- The shimmer controlspec is custom, so it doesn't automatically get divided by 100 when sent to the engine
+    engine[param_id](value / 100.0)
+  else
+    Pedal._message_engine_for_param_change(self, param_id, value)
+  end
 end
 
 return ReverbPedal

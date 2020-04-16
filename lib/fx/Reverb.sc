@@ -1,12 +1,11 @@
 ReverbPedal : Pedal {
   *id { ^\reverb; }
 
-  *fxArguments { ^[\size, \decay, \tone]; }
+  *fxArguments { ^[\size, \decay, \shimmer, \tone]; }
 
   *fxDef {^{|wet|
     // Adapted from @justmat's Pools
-    // TODO: in fact, maybe add shimmer?
-    var size, decay, tone, t60, reverbSize, decayBySize, damp, earlyDiff, freq, filterType;
+    var size, decay, tone, t60, reverbSize, decayBySize, damp, earlyDiff, freq, filterType, feedback, shifted;
 
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
     // Tone above 0.75 switches to a HPF
@@ -28,6 +27,8 @@ ReverbPedal : Pedal {
       \noise.kr(0.0003)
     ).softclip;
 
+    feedback = LocalIn.ar(2);
+
     // Then we feed into the reverb section
     size = \size.kr(0.5);
       reverbSize = Select.kr(size > 0.75, [
@@ -47,7 +48,7 @@ ReverbPedal : Pedal {
     ]);
     damp = LinLin.kr(tone, 0, 1, 1, 0);
     wet = JPverb.ar(
-        wet,
+        wet + feedback,
         t60,
         damp,
         reverbSize,
@@ -60,5 +61,9 @@ ReverbPedal : Pedal {
         \lowband.kr(500),
         \highband.kr(2000)
     );
+
+    shifted = PitchShift.ar(wet, 0.5, 2.0, 0.03, 0.1);
+    LocalOut.ar(shifted * \shimmer.kr(0));
+    wet;
   }}
 }
