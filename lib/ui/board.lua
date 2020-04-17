@@ -16,6 +16,7 @@ local pedal_classes = {
   include("lib/ui/pedals/tremolo"),
   include("lib/ui/pedals/distortion"),
   include("lib/ui/pedals/flanger"),
+  include("lib/ui/pedals/phaser"),
   include("lib/ui/pedals/compressor"),
   include("lib/ui/pedals/sustain"),
   include("lib/ui/pedals/bitcrusher"),
