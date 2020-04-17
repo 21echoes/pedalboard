@@ -20,6 +20,7 @@ local pedal_classes = {
   include("lib/ui/pedals/compressor"),
   include("lib/ui/pedals/sustain"),
   include("lib/ui/pedals/bitcrusher"),
+  include("lib/ui/pedals/pitch_shifter"),
   include("lib/ui/pedals/equalizer"),
   include("lib/ui/pedals/tuner"),
 }
