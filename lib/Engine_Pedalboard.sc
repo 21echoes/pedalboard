@@ -18,6 +18,7 @@ Engine_Pedalboard : CroneEngine {
   alloc {
     // Set up pedal definitions and commands
     allPedalDefinitions = [
+      AutoWahPedal,
       BitcrusherPedal,
       ChorusPedal,
       CompressorPedal,
