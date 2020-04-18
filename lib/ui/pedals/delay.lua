@@ -67,14 +67,10 @@ function DelayPedal.params()
     options = {"Default", "Ping-Pong"},
   }
 
-  -- Default out gain of 6 dB
-  local default_params = Pedal._default_params(id_prefix)
-  default_params[2][2].controlspec = Controlspecs.gain(6)
-
   return {
     {{bpm_control, beat_division_control}, {feedback_control}},
     {{quality_control, mode_control}},
-    default_params
+    Pedal._default_params(id_prefix)
   }
 end
 

@@ -86,4 +86,42 @@ DelayPedal : Pedal {
       delayedSignal;
     });
   }}
+
+  *addDef {|contextArg|
+    // Adapted from superclass for alternate wet/dry mix behavior
+    context = contextArg;
+    SynthDef(this.id, {
+      var inL = \inL.kr(0),
+      inR = \inR.kr(1),
+      out = \out.kr(0),
+      bypass = \bypass.kr(0),
+      mix = \mix.kr(0.5),
+      inGain = \in_gain.kr(1.0),
+      outGain = \out_gain.kr(1.0),
+      dry, wet, mixdown, effectiveMixRate, centerMix, dryMix, wetMix;
+      dry = [In.ar(inL), In.ar(inR)];
+      wet = dry * inGain;
+      wet = SynthDef.wrap(this.fxDef, prependArgs: [wet]);
+      wet = LeakDC.ar(wet * outGain);
+      // If bypass is on, act as if the mix is 0% no matter what
+      effectiveMixRate = min(mix, 1 - bypass);
+
+      // Begin custom behavior:
+      centerMix = 0.707;
+      // For dry, from 0->0.5->1 should do 1->centerMix->0
+      dryMix = Select.kr(effectiveMixRate > 0.5, [
+        LinLin.kr(effectiveMixRate, 0, 0.5, 1, centerMix),
+        LinLin.kr(effectiveMixRate, 0.5, 1, centerMix, 0),
+      ]);
+      // For wet, from 0->0.5->1 should do 0->centerMix->1
+      wetMix = Select.kr(effectiveMixRate > 0.5, [
+        LinLin.kr(effectiveMixRate, 0, 0.5, 0, centerMix),
+        LinLin.kr(effectiveMixRate, 0.5, 1, centerMix, 1),
+      ]);
+      mixdown = Mix.new([dry * dryMix, wet * wetMix]);
+      // End custom behavior
+
+      Out.ar(out, mixdown);
+    }).add;
+  }
 }
