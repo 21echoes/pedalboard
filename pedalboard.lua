@@ -16,10 +16,10 @@
 -- Pedal Pages
 -- E2 / E3 change dial values
 -- K2 / K3 cycle thru dial pairs
--- Hold K2, tap K3 for tap tempo
+-- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
--- v0.9.4 @21echoes
+-- v1.0.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
