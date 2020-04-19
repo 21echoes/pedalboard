@@ -14,7 +14,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * Bitcrusher
 * Equalizer
 * Tuner
-* More to come in future versions! File a GitHub issue with recommendations
+* More to come in future versions! File a GitHub issue with recommendations, or join the discussion at [Lines](https://llllllll.co/t/pedalboard-chainable-fx-for-norns/31119/27)
 
 ## UI & Controls
 * E1 always changes page
@@ -43,18 +43,15 @@ A simple collection of chainable effects for the Norns sound computer.
   * Wet/dry
   * In gain
   * Out gain
-* On pedals with tap-tempo (currently just Delay), hold K2 and tap K3 for tap tempo
+* On pedals with tap-tempo (currently Delay and Tremolo), hold K2 and tap K3 for tap tempo
 
 ## Requirements
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
-* Reset after install and updates (this is a new Engine)
+* Reset after installs or updates (this is a new Engine)
 
 ## Roadmap
-### Initial Release
-* This project is currently in a beta state!
-* Extensive usage and bug auditing to find and fix any bug or tune any pedals that need tuning
-* Then we'll film a brief demo video and post to [Lines](https://llllllll.co/)
+Film a brief demo video showing how it works
 
 ### More Pedals!
 * Pitch Shifter (params: Interval, Fine)
@@ -64,7 +61,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * Eventually: Noise Gate, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
 
 ### Better Pedals!
-* Multi-tap and Varispeed delays
+* Multi-tap, Varispeed, and Slapback delays
 * Spring and Plate reverbs
 * EQ shelves can be filters instead, and an additional peak EQ
 * Continued iteration on how the dials alter the effect
