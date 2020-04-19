@@ -33,6 +33,7 @@ Engine_Pedalboard : CroneEngine {
       SustainPedal,
       TremoloPedal,
       TunerPedal,
+      VibratoPedal,
     ];
     allPedalIds = List.new;
     pedalDetails = Dictionary.new;
