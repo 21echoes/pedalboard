@@ -78,7 +78,29 @@ Engine_Pedalboard : CroneEngine {
   }
 
   insertPedalAtIndex {|index, pedalId|
-    var inL, inR, out, target, addAction;
+    var inL, inR, out, target, addAction, indexToRemove = -1;
+
+    // Don't allow inserting beyond the end of the board (other than adding just onto the end)
+    if (index > boardIds.size, {
+      index = boardIds.size;
+    });
+
+    // If the pedal is already elsewhere in the chain, remove it first.
+    // TODO: this could be made somewhat more "correct" by saving synths on a board array, rather than in the id lookup.
+    // This would mean a rethinking of how the addCommand works (likely: loop over board until match is found)
+    if (pedalDetails[pedalId][\synth].notNil, {
+      boardIds.do({|item, i| if (item == pedalId, { indexToRemove = i; }); });
+    });
+    if (indexToRemove != -1, {
+      // No work to do if the pedal is already in the right place
+      if (indexToRemove == index, { ^this; });
+      this.removePedalAtIndex(indexToRemove);
+      // This now results in the pedal not being put at exactly `index`,
+      // but for now it's necessary given how we don't allow duplicate pedals
+      if (index > indexToRemove, { index = index - 1 });
+    });
+
+    // Okay, enough edge cases. Now for the real insertion.
     if (index == 0, {
       // The first pedal always has the main ins as its inputs, and is added to the head of the group
       inL = this.getInL;
@@ -164,7 +186,9 @@ Engine_Pedalboard : CroneEngine {
   }
 
   swapPedalAtIndex {|index, newPedalId|
-    this.removePedalAtIndex(index);
+    if (index < boardIds.size, {
+      this.removePedalAtIndex(index);
+    });
     this.insertPedalAtIndex(index, newPedalId);
   }
 
