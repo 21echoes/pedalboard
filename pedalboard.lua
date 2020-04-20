@@ -35,6 +35,11 @@ local pages_table
 local SCREEN_FRAMERATE = 15
 local screen_refresh_metro
 
+-- User's initial audio settings
+local initital_monitor_level
+local initital_reverb_onoff
+local initital_compressor_onoff
+
 function init()
   -- Setup our overall rendering style
   screen.level(15)
@@ -47,10 +52,12 @@ function init()
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.
-  -- TODO: is this good behavior? How do we put the user back where they were before when they leave?
-  audio.level_monitor(0.0)
-  audio.rev_off()
-  audio.comp_off()
+  initital_monitor_level = params:get('monitor_level')
+  params:set('monitor_level', -math.huge)
+  initital_reverb_onoff = params:get('reverb')
+  params:set('reverb', 1) -- 1 is OFF
+  initital_compressor_onoff = params:get('compressor')
+  params:set('compressor', 1) -- 1 is OFF
 
   -- Set up pages
   pages_table = {Board:new(
@@ -112,17 +119,19 @@ end
 
 function cleanup()
   -- deinitialization
-  metro.free(screen_refresh_metro)
+  metro.free(screen_refresh_metro.id)
   screen_refresh_metro = nil
   -- I'm not particularly sure on the details of Lua memory management, so we go a little overboard here maybe
-  board = pages_table[1]
-  board:cleanup()
   for i, page in ipairs(pages_table) do
     pages_table[i]:cleanup()
     pages_table[i] = nil
   end
   pages_table = nil
   pages = nil
+  -- Put user's audio settings back where they were
+  params:set('monitor_level', initital_monitor_level)
+  params:set('reverb', initital_reverb_onoff)
+  params:set('compressor', initital_compressor_onoff)
 end
 
 -- Utils

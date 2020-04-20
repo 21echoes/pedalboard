@@ -69,7 +69,7 @@ function Board:add_params()
     name="Input Mode",
     type="option",
     options={"Mono", "Stereo"},
-    default=2,
+    default=(params:get('monitor_mode') == 1 and 2 or 1),
     action=function(value)
       local coerced_value = value
       if value == "Stereo" then coerced_value = 2 elseif value == "Mono" then coerced_value = 1 end
