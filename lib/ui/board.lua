@@ -1,8 +1,10 @@
 --- Board
 -- @classmod Board
 
+local ControlSpec = require "controlspec"
 local UI = require "ui"
 local tabutil = require "tabutil"
+local Controlspecs = include("lib/ui/util/controlspecs")
 local ScreenState = include("lib/ui/util/screen_state")
 
 -- All possible pedals, ordered by something like how common they are
@@ -73,6 +75,20 @@ function Board:add_params()
       if value == "Stereo" then coerced_value = 2 elseif value == "Mono" then coerced_value = 1 end
       engine.set_num_input_channels(coerced_value)
     end
+  })
+  params:add({
+    id="input_amp",
+    name="Input Gain",
+    type="control",
+    controlspec=Controlspecs.BOOSTCUT,
+    action=function(value) engine.set_input_amp(util.dbamp(value)) end
+  })
+  params:add({
+    id="output_amp",
+    name="Output Gain",
+    type="control",
+    controlspec=Controlspecs.BOOSTCUT,
+    action=function(value) engine.set_output_amp(util.dbamp(value)) end
   })
 
   -- Don't add the group, as for now we're just hiding these params

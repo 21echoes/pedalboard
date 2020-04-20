@@ -51,7 +51,7 @@ function EqualizerPedal.params()
     id = id_prefix .. "_ls_amp",
     name = "Low Shelf Gain",
     type = "control",
-    controlspec = ControlSpec.new(-20, 20, "lin", 0.5, 0, "dB"),
+    controlspec = Controlspecs.BOOSTCUT,
   }
   local hs_freq_control = {
     id = id_prefix .. "_hs_freq",
@@ -63,7 +63,7 @@ function EqualizerPedal.params()
     id = id_prefix .. "_hs_amp",
     name = "High Shelf Gain",
     type = "control",
-    controlspec = ControlSpec.new(-20, 20, "lin", 0.5, 0, "dB"),
+    controlspec = Controlspecs.BOOSTCUT,
   }
   local mid_freq_control = {
     id = id_prefix .. "_mid_freq",
@@ -75,7 +75,7 @@ function EqualizerPedal.params()
     id = id_prefix .. "_mid_amp",
     name = "Mid Gain",
     type = "control",
-    controlspec = ControlSpec.new(-20, 20, "lin", 0.5, 0, "dB"),
+    controlspec = Controlspecs.BOOSTCUT,
   }
   local mid_q_control = {
     id = id_prefix .. "_mid_q",

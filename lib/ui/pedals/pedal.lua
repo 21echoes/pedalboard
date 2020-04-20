@@ -70,19 +70,19 @@ function Pedal._default_params(id_prefix)
     id = id_prefix .. "_mix",
     name = "Dry/Wet",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local in_gain_control = {
     id = id_prefix .. "_in_gain",
     name = "In Gain",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_GAIN,
+    controlspec = Controlspecs.GAIN,
   }
   local out_gain_control = {
     id = id_prefix .. "_out_gain",
     name = "Out Gain",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_GAIN,
+    controlspec = Controlspecs.GAIN,
   }
   return {{bypass_control, mix_control}, {in_gain_control, out_gain_control}}
 end

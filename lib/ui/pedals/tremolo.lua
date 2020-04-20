@@ -53,13 +53,13 @@ function TremoloPedal.params()
     id = id_prefix .. "_depth",
     name = "Depth",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local shape_control = {
     id = id_prefix .. "_shape",
     name = "Shape",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
 
   -- Default mix of 100%

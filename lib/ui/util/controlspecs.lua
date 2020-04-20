@@ -12,15 +12,25 @@ function controlspecs.gain(default)
   return ControlSpec.new(-81, 12, "lin", 0.5, default, "dB")
 end
 
-controlspecs.CONTROL_SPEC_MIX = controlspecs.mix()
-controlspecs.CONTROL_SPEC_GAIN = controlspecs.gain()
+function controlspecs.boostcut(default)
+  default = default ~= nil and default or 0
+  return ControlSpec.new(-20, 20, "lin", 0.5, default, "dB")
+end
+
+controlspecs.MIX = controlspecs.mix()
+controlspecs.GAIN = controlspecs.gain()
+controlspecs.BOOSTCUT = controlspecs.boostcut()
 
 function controlspecs.is_mix(test)
-  return controlspecs._specs_are_equal(test, controlspecs.CONTROL_SPEC_MIX)
+  return controlspecs._specs_are_equal(test, controlspecs.MIX)
 end
 
 function controlspecs.is_gain(test)
-  return controlspecs._specs_are_equal(test, controlspecs.CONTROL_SPEC_GAIN)
+  return controlspecs._specs_are_equal(test, controlspecs.GAIN)
+end
+
+function controlspecs.is_boostcut(test)
+  return controlspecs._specs_are_equal(test, controlspecs.BOOSTCUT)
 end
 
 function controlspecs._specs_are_equal(a, b)

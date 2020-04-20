@@ -5,6 +5,10 @@ Engine_Pedalboard : CroneEngine {
   var pedalDetails;
   var buses;
   var passThru;
+  var inputStage;
+  var inputAmp = 1;
+  var outputStage;
+  var outputAmp = 1;
   var numInputChannels = 2;
 
   *new { arg context, doneCallback;
@@ -45,13 +49,30 @@ Engine_Pedalboard : CroneEngine {
     });
 
     // Make a simple passthru synth for the empty board
-    SynthDef(\passThru, {|inL, inR, out|
-      Out.ar(out, [In.ar(inL), In.ar(inR)]);
+    SynthDef(\passThru, {|inL, inR, out, amp=1|
+      Out.ar(out, [In.ar(inL), In.ar(inR)] * amp);
     }).add;
     context.server.sync;
 
     boardIds = List[];
     buses = List.new;
+    // Start the buses with a bus coming from inputStage and a bus going to outputStage
+    buses.add(Bus.audio(context.server, 2));
+    buses.add(Bus.audio(context.server, 2));
+
+    // make the inputStage and outputStage and connect the input and output buses
+    inputStage = Synth.new(\passThru, [
+      \inL, this.getInL,
+      \inR, this.getInR,
+      \out, buses[0].index,
+      \amp, inputAmp,
+    ], context.xg);
+    outputStage = Synth.new(\passThru, [
+      \inL, buses[1].index,
+      \inR, buses[1].index + 1,
+      \out, context.out_b.index,
+      \amp, outputAmp,
+    ], inputStage, \addAfter);
 
     // Set up commands for board management
     this.addCommand("add_pedal", "s", {|msg| this.addPedal(msg[1]);});
@@ -59,6 +80,8 @@ Engine_Pedalboard : CroneEngine {
     this.addCommand("remove_pedal_at_index", "i", {|msg| this.removePedalAtIndex(msg[1]);});
     this.addCommand("swap_pedal_at_index", "is", {|msg| this.swapPedalAtIndex(msg[1], msg[2]);});
     this.addCommand("set_num_input_channels", "i", {|msg| this.setNumInputChannels(msg[1]);});
+    this.addCommand("set_input_amp", "f", {|msg| this.setInputAmp(msg[1]);});
+    this.addCommand("set_output_amp", "f", {|msg| this.setOutputAmp(msg[1]);});
 
     this.buildNoPedalState;
 
@@ -66,11 +89,12 @@ Engine_Pedalboard : CroneEngine {
   }
 
   buildNoPedalState {
+    // Have a no-op "pedal" in the middle to connect buses[1] to buses[2]
     passThru = Synth.new(\passThru, [
-      \inL, this.getInL,
-      \inR, this.getInR,
-      \out, context.out_b.index,
-    ], context.xg);
+      \inL, buses[0].index,
+      \inR, buses[0].index + 1,
+      \out, buses[1].index,
+    ], inputStage, \addAfter);
   }
 
   addPedal {|pedalId|
@@ -78,7 +102,7 @@ Engine_Pedalboard : CroneEngine {
   }
 
   insertPedalAtIndex {|index, pedalId|
-    var inL, inR, out, target, addAction, indexToRemove = -1;
+    var inL, inR, out, target, addAction = \addAfter, indexToRemove = -1;
 
     // Don't allow inserting beyond the end of the board (other than adding just onto the end)
     if (index > boardIds.size, {
@@ -101,41 +125,21 @@ Engine_Pedalboard : CroneEngine {
     });
 
     // Okay, enough edge cases. Now for the real insertion.
-    if (index == 0, {
-      // The first pedal always has the main ins as its inputs, and is added to the head of the group
-      inL = this.getInL;
-      inR = this.getInR;
-      target = context.xg;
-      addAction = \addToHead;
-    });
-    if (index == boardIds.size, {
-      // The last pedal always has the main outs as its outputs
-      out = context.out_b.index;
-    });
+    // Our inputs are always the bus at our target index
+    inL = buses[index].index;
+    inR = buses[index].index + 1;
+    // If there's pedals, we have to make a bus as our output to patch in to the existing pedals
+    // (if there's no pedals yet, there's already a bus at buses[1] waiting for us to use)
     if (boardIds.size != 0, {
-      // If there's pedals, we have to make a bus to patch in to the existing pedals
-      var bus;
-      bus = Bus.audio(context.server, 2);
-      if (index == boardIds.size, {
-        // The last pedal uses the bus as its inputs
-        inL = bus.index;
-        inR = bus.index + 1;
-      }, {
-        // The other pedals use the new bus as their output
-        out = bus.index;
-        if (index != 0, {
-          // Middle pedals also use the existing bus coming out of the pedal already at their index as their input
-          var priorBus = buses[index - 1];
-          inL = priorBus.index;
-          inR = priorBus.index + 1;
-        });
-      });
-      if (index != 0, {
-        // If we're not the first pedal, define which pedal we're going after
-        target = pedalDetails[boardIds[index - 1]][\synth];
-        addAction = \addAfter;
-      });
-      buses.insert(index, bus);
+      buses.insert(index + 1, Bus.audio(context.server, 2));
+    });
+    // Our output is the bus at index+1
+    out = buses[index + 1].index;
+    // We add ourselves after the prior pedal (or after the inputStage if there's no pedals yet)
+    if (index == 0, {
+      target = inputStage;
+    }, {
+      target = pedalDetails[boardIds[index - 1]][\synth];
     });
     pedalDetails[pedalId][\synth] = Synth.new(
       pedalId,
@@ -143,19 +147,16 @@ Engine_Pedalboard : CroneEngine {
       target,
       addAction
     );
+    if (index == boardIds.size, {
+        // If we're inserting at the end, we set the outputStage to have its inputs as our outputs
+      outputStage.set(\inL, out, \inR, out + 1);
+    }, {
+      // Otherwise we set the pedal after us's inputs as our outputs
+      pedalDetails[boardIds[index]][\synth].set(\inL, out, \inR, out + 1);
+    });
     if (boardIds.size == 0, {
       // If there used to be no pedals, we have to free up the passThru synth
       passThru.free;
-    }, {
-      if (index == boardIds.size, {
-        // The new last pedal, if there are already pedals,
-        // sets the output of the current last pedal as the new last pedal's input
-        pedalDetails[boardIds[index - 1]][\synth].set(\out, inL);
-      }, {
-        // The new first pedal, if there are already pedals,
-        // sets the input of the current first pedal as the new first pedal's output
-        pedalDetails[boardIds[index]][\synth].set(\inL, out, \inR, out + 1);
-      });
     });
     boardIds.insert(index, pedalId);
   }
@@ -164,21 +165,17 @@ Engine_Pedalboard : CroneEngine {
     if (boardIds.size == 1, {
       this.buildNoPedalState;
     }, {
-      if (index == 0, {
-        var nextPedal = pedalDetails[boardIds[index + 1]][\synth];
-        nextPedal.set(\inL, this.getInL, \inR, this.getInR);
-        buses[index].free;
-        buses.removeAt(index);
+      // Set the pedal (or output stage) after us to have our inputs as its new inputs
+      var inputBus = buses[index];
+      if (index == (boardIds.size - 1), {
+        outputStage.set(\inL, inputBus.index, \inR, inputBus.index + 1);
       }, {
-        var priorPedal = pedalDetails[boardIds[index - 1]][\synth];
-        if (index == (boardIds.size - 1), {
-          priorPedal.set(\out, context.out_b);
-        }, {
-          priorPedal.set(\out, buses[index]);
-        });
-        buses[index - 1].free;
-        buses.removeAt(index - 1);
+        var nextPedal = pedalDetails[boardIds[index + 1]][\synth];
+        nextPedal.set(\inL, inputBus.index, \inR, inputBus.index + 1);
       });
+      // Free up the bus we were using as an output
+      buses[index + 1].free;
+      buses.removeAt(index + 1);
     });
     pedalDetails[boardIds[index]][\synth].free;
     pedalDetails[boardIds[index]][\synth] = nil;
@@ -192,14 +189,9 @@ Engine_Pedalboard : CroneEngine {
     this.insertPedalAtIndex(index, newPedalId);
   }
 
-  setNumInputChannels{|numChannelsArg|
+  setNumInputChannels {|numChannelsArg|
     numInputChannels = numChannelsArg;
-    if (boardIds.size == 0, {
-      passThru.set(\inL, this.getInL, \inR, this.getInR);
-    }, {
-      var firstPedal = pedalDetails[boardIds[0]][\synth];
-      firstPedal.set(\inL, this.getInL, \inR, this.getInR);
-    });
+    inputStage.set(\inL, this.getInL, \inR, this.getInR);
   }
 
   getInL {
@@ -214,9 +206,21 @@ Engine_Pedalboard : CroneEngine {
     });
   }
 
+  setInputAmp {|amp|
+    inputAmp = amp;
+    inputStage.set(\amp, inputAmp);
+  }
+
+  setOutputAmp {|amp|
+    outputAmp = amp;
+    outputStage.set(\amp, outputAmp);
+  }
+
   free {
     buses.do({|bus| bus.free; });
     allPedalIds.do({|pedalId| pedalDetails[pedalId][\synth].free;});
+    outputStage.free;
     passThru.free;
+    inputStage.free;
   }
 }

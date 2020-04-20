@@ -35,13 +35,13 @@ function OverdrivePedal.params()
     id = id_prefix .. "_drive",
     name = "Drive",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local tone_control = {
     id = id_prefix .. "_tone",
     name = "Tone",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
 
   return {

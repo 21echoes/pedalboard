@@ -36,13 +36,13 @@ function ReverbPedal.params()
     id = id_prefix .. "_size",
     name = "Size",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local decay_control = {
     id = id_prefix .. "_decay",
     name = "Decay Time",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local shimmer_control = {
     id = id_prefix .. "_shimmer",
@@ -54,7 +54,7 @@ function ReverbPedal.params()
     id = id_prefix .. "_tone",
     name = "Tone",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
 
   return {

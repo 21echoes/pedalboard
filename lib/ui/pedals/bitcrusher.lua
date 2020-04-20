@@ -48,13 +48,13 @@ function BitcrusherPedal.params()
     id = id_prefix .. "_tone",
     name = "Tone",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local gate_control = {
     id = id_prefix .. "_gate",
     name = "Noise Gate",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
 
   return {

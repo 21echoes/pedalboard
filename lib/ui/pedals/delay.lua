@@ -52,7 +52,7 @@ function DelayPedal.params()
     id = id_prefix .. "_feedback",
     name = "Feedback",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local quality_control = {
     id = id_prefix .. "_quality",

@@ -34,13 +34,13 @@ function ChorusPedal.params()
     id = id_prefix .. "_rate",
     name = "Rate",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
   local depth_control = {
     id = id_prefix .. "_depth",
     name = "Depth",
     type = "control",
-    controlspec = Controlspecs.CONTROL_SPEC_MIX,
+    controlspec = Controlspecs.MIX,
   }
 
   return {
