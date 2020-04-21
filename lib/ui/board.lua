@@ -380,6 +380,7 @@ function Board:_render_tab_content(i)
       return
     elseif self._reorder_source ~= self._reorder_destination and i == self._reorder_destination then
       -- Render "Move here" as centered text
+      screen.level(15)
       screen.move(center_x, center_y - 4)
       screen.text_center("Move")
       screen.move(center_x, center_y + 4)
@@ -411,8 +412,27 @@ function Board:_render_tab_content(i)
     return
   end
 
+  -- If we're mid-pedal-reorder, render the after-reorder state
+  render_as_active = i == self.tabs.index
+  if self._reorder_source ~= self._reorder_destination then
+    -- We've already rendered a tab as active in this case
+    render_as_active = false
+    if self._reorder_source > self._reorder_destination then
+      if i == self._reorder_destination then
+        i = self._reorder_source
+      elseif i > self._reorder_destination and i <= self._reorder_source then
+        i = i - 1
+      end
+    else
+      if i == self._reorder_destination then
+        i = self._reorder_source
+      elseif i >= self._reorder_source and i < self._reorder_destination then
+        i = i + 1
+      end
+    end
+  end
   -- Defer to the pedal instance to render as tab
-  self.pedals[i]:render_as_tab(offset, width, i == self.tabs.index)
+  self.pedals[i]:render_as_tab(offset, width, render_as_active)
 end
 
 function Board:_get_offset_and_width(i)
