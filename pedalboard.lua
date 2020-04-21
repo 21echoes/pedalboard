@@ -158,9 +158,12 @@ function insert_page_at_index(index, page_instance)
   ScreenState.mark_screen_dirty(true)
 end
 
-function remove_page(index)
+function remove_page(index, cleanup)
+  cleanup = cleanup == nil and true or cleanup
   page = table.remove(pages_table, index)
-  page:cleanup()
+  if cleanup then
+    page:cleanup()
+  end
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end

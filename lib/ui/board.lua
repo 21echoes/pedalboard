@@ -499,7 +499,7 @@ function Board:_reorder_pedals()
   -- remove pedal at reorder_source
   engine.remove_pedal_at_index(self._reorder_source - 1) -- The engine is zero-indexed
   table.remove(self.pedals, self._reorder_source)
-  self._remove_page(self._reorder_source + 1) -- The parent has a page for each pedal at 1 beyond the slot index on the board
+  self._remove_page(self._reorder_source + 1, false) -- The parent has a page for each pedal at 1 beyond the slot index on the board
 
   -- insert the pedal at reorder_destination
   engine.insert_pedal_at_index(self._reorder_destination - 1, pedal_instance_to_move.id) -- The engine is zero-indexed
@@ -539,7 +539,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     self:_sync_pedals_to_params()
     self:_setup_tabs()
     self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
-    self._remove_page(page_index)
+    self._remove_page(page_index, true)
     return
   end
   pedal_class = pedal_classes[pedal_class_index]
