@@ -31,6 +31,7 @@ Engine_Pedalboard : CroneEngine {
       PhaserPedal,
       PitchShifterPedal,
       ReverbPedal,
+      SubBoostPedal,
       SustainPedal,
       TremoloPedal,
       TunerPedal,
