@@ -27,6 +27,7 @@ Engine_Pedalboard : CroneEngine {
       DistortionPedal,
       EqualizerPedal,
       FlangerPedal,
+      LoFiPedal,
       OverdrivePedal,
       PhaserPedal,
       PitchShifterPedal,

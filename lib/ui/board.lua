@@ -24,6 +24,7 @@ local pedal_classes = {
   include("lib/ui/pedals/sub_boost"),
   include("lib/ui/pedals/vibrato"),
   include("lib/ui/pedals/auto_wah"),
+  include("lib/ui/pedals/lofi"),
   include("lib/ui/pedals/amp_simulator"),
   include("lib/ui/pedals/equalizer"),
   include("lib/ui/pedals/tuner"),
