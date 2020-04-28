@@ -19,7 +19,7 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
--- v1.1.0 @21echoes
+-- v1.2.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
