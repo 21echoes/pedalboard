@@ -18,7 +18,7 @@ SubBoostPedal : Pedal {
     // Sensitivity controls how clear the pitch must be to trigger the sub kicking in
     threshold = LinLin.kr(\sensitivity.kr(0.5), 0, 1, 0.05, 0.75);
     // Amp controls the baseline amplitude, factoring in pitch certainty and envelope following
-    envFollower = EnvFollow.ar((wet * 2).softclip, 0.999);
+    envFollower = EnvFollow.ar((wet * 2).softclip, 0.9999);
     amp = \amp.kr(0.5) * Select.kr(freqClarity > threshold, [
       0,
       (0.75 * envFollower) + (0.25 * ((freqClarity - threshold)/(1 - threshold))),
