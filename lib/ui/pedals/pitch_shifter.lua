@@ -5,12 +5,12 @@ local ControlSpec = require "controlspec"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
 local Controlspecs = include("lib/ui/util/controlspecs")
+local JustIntonation = include("lib/ui/util/just_intonation")
 
 local PitchShifterPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 PitchShifterPedal.id = "pitchshifter"
 
-local LIMIT_7_RATIOS = {16/15, 9/8, 6/5, 5/4, 4/3, 7/5, 3/2, 8/5, 5/3, 16/9, 15/8, 2}
 local SEMITONE = math.pow(2, 1/12)
 local CENT = math.pow(2, 1/1200)
 
@@ -24,6 +24,8 @@ function PitchShifterPedal:new(bypass_by_default)
     i:_default_section(),
   }
   i:_complete_initialization()
+  i._param_id_to_widget[i.id .. "_interval"]:set_marker_position(1, 0)
+  i._param_id_to_widget[i.id .. "_interval"].start_value = 0
 
   return i
 end
@@ -66,17 +68,10 @@ function PitchShifterPedal.params()
   }
 end
 
-function PitchShifterPedal._calculate_freq_mul(interval, just_temperament, fine)
+function PitchShifterPedal._calculate_freq_mul(interval, just_intonation, fine)
   local mul_pre_fine
-  if just_temperament then
-    if interval == 0 then
-      mul_pre_fine = 1
-    else
-      local negative_interval = interval < 0
-      if negative_interval then interval = -interval end
-      mul_pre_fine = LIMIT_7_RATIOS[((interval - 1) % 12) + 1] * math.ceil(interval / 12)
-      if negative_interval then mul_pre_fine = 1 / mul_pre_fine end
-    end
+  if just_intonation then
+    mul_pre_fine = JustIntonation.calculate_freq_mul(interval)
   else
     mul_pre_fine = math.pow(SEMITONE, interval)
   end
@@ -90,11 +85,11 @@ function PitchShifterPedal:_message_engine_for_param_change(param_id, value)
   if param_id == interval_param_id or param_id == temperament_param_id or param_id == fine_tune_param_id then
     local interval = param_id == interval_param_id and value or params:get(interval_param_id)
     if interval == nil then interval = 0 end
-    local just_temperament = param_id == temperament_param_id and value == 0 or params:get(temperament_param_id) == 1
-    if just_temperament == nil then just_temperament = true end
+    local just_intonation = param_id == temperament_param_id and value == 0 or params:get(temperament_param_id) == 1
+    if just_intonation == nil then just_intonation = true end
     local fine_tune = param_id == fine_tune_param_id and value or params:get(fine_tune_param_id)
     if fine_tune == nil then fine_tune = 0 end
-    local freq_mul = self._calculate_freq_mul(interval, just_temperament, fine_tune)
+    local freq_mul = self._calculate_freq_mul(interval, just_intonation, fine_tune)
     engine.pitchshifter_freq_mul(freq_mul)
     return
   end

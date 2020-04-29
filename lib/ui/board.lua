@@ -21,6 +21,7 @@ local pedal_classes = {
   include("lib/ui/pedals/sustain"),
   include("lib/ui/pedals/bitcrusher"),
   include("lib/ui/pedals/wavefolder"),
+  include("lib/ui/pedals/ring_modulator"),
   include("lib/ui/pedals/pitch_shifter"),
   include("lib/ui/pedals/sub_boost"),
   include("lib/ui/pedals/vibrato"),
