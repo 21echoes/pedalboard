@@ -27,7 +27,7 @@ function TunerPedal:new(bypass_by_default)
 
   i._pitch_poll = poll.set("pitch_in_l")
   i._pitch_poll.callback = function(value) i:_pitch_poll_callback(value) end
-  i._pitch_poll.time = 0.25
+  i._pitch_poll.time = 0.066
   i._pitch_poll:start()
   i._detected_freq = nil
   i._detected_note = nil
