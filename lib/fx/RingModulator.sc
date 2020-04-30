@@ -4,13 +4,13 @@ RingModulatorPedal : Pedal {
   *fxArguments { ^[\freq, \follow, \freq_mul, \shape, \tone]; }
 
   *fxDef {^{|wet|
-    var freq, followFreq, freqClarity, modulator, tone, filterFreq, filterType,
+    var freq, followFreq, freqClarity, modulator, tone, filterFreq,
     shape, sinMix, triMix, sawMix, sqrMix;
 
     // Specific frequency mode:
     freq = \freq.kr(220);
     // Follow mode:
-    # followFreq, freqClarity = Pitch.kr(wet[0], initFreq: 0, minFreq: 30, maxFreq: 4200, execFreq: 1000, ampThreshold: 0.02, median: 3, clar: 1);
+    # followFreq, freqClarity = Pitch.kr(wet[0], initFreq: 0, minFreq: 30, maxFreq: 4200, execFreq: 300, ampThreshold: 0.02, median: 1, clar: 1);
     followFreq = Select.kr(followFreq, [220, followFreq * \freq_mul.kr(0)]);
     freq = Select.kr(\follow.kr(0), [freq, followFreq]);
 
@@ -50,14 +50,9 @@ RingModulatorPedal : Pedal {
       ]),
       LinExp.kr(tone, 0.75, 1, 20, 21000),
     ]);
-    filterType = Select.kr(tone > 0.75, [0, 1]);
-    wet = DFM1.ar(
-      wet,
-      filterFreq,
-      \res.kr(0.1),
-      1.0,
-      filterType,
-      \noise.kr(0.0003)
-    ).softclip;
+    wet = Select.ar(tone > 0.75, [
+      MoogFF.ar(wet, freq: filterFreq, gain: 0.1),
+      RHPF.ar(wet, freq: filterFreq, rq: 10),
+    ]).softclip;
   }}
 }

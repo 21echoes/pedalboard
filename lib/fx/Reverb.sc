@@ -5,7 +5,7 @@ ReverbPedal : Pedal {
 
   *fxDef {^{|wet|
     // Adapted from @justmat's Pools
-    var size, decay, tone, t60, reverbSize, decayBySize, damp, earlyDiff, freq, filterType, feedback, shifted;
+    var size, decay, tone, t60, reverbSize, decayBySize, damp, earlyDiff, freq, feedback, shifted;
 
     // Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
     // Tone above 0.75 switches to a HPF
@@ -17,15 +17,10 @@ ReverbPedal : Pedal {
       ]),
       LinExp.kr(tone, 0.75, 1, 20, 21000),
     ]);
-    filterType = Select.kr(tone > 0.75, [0, 1]);
-    wet = DFM1.ar(
-      wet,
-      freq,
-      \res.kr(0.1),
-      1.0,
-      filterType,
-      \noise.kr(0.0003)
-    ).softclip;
+    wet = Select.ar(tone > 0.75, [
+      MoogFF.ar(wet, freq: freq, gain: 0.1),
+      RHPF.ar(wet, freq: freq, rq: 10),
+    ]).softclip;
 
     feedback = LocalIn.ar(2);
 
