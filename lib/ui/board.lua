@@ -30,6 +30,8 @@ local pedal_classes = {
   include("lib/ui/pedals/amp_simulator"),
   include("lib/ui/pedals/equalizer"),
   include("lib/ui/pedals/tuner"),
+  include("lib/ui/pedals/rings"),
+  include("lib/ui/pedals/clouds"),
 }
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
