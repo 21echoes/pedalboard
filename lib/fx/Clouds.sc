@@ -5,7 +5,7 @@ CloudsPedal : Pedal {
 
   *fxDef {^{|wet|
     var pit=0, pos=0.5, size=0.5, dens=0.5, tex=0, drywet=1, in_gain=1, spread=0.5, rvb=0.5, fb=0, freeze=0, mode=0, lofi=0, trig=0;
-	pit = \pit.kr(0.7);
+	pit = \pit.kr(0);
 	pos = \pos.kr(0.5);
 	size = \size.kr(0.5);
 	dens = \dens.kr(0.5);

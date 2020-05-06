@@ -42,48 +42,48 @@ function CloudsPedal.params()
     id = id_prefix .. "_pos",
     name = "Position",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.5, ""),
+    controlspec = Controlspecs.MIX
   }
   local size_control = {
     id = id_prefix .. "_size",
     name = "Size",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.5, ""),
+    controlspec = Controlspecs.MIX
   }
 
   local dens_control = {
     id = id_prefix .. "_dens",
     name = "Density",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.5, ""),
+    controlspec = Controlspecs.MIX
   }
 
   local tex_control = {
     id = id_prefix .. "_tex",
     name = "Texture",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0, ""),
+    controlspec = Controlspecs.mix(0)
   }
 
   local spread_control = {
     id = id_prefix .. "_spread",
     name = "Spread",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0, ""),
+    controlspec = Controlspecs.MIX
   }
 
   local mode_control = {
     id = id_prefix .. "_mode",
     name = "Mode",
-    type = "control",
-    controlspec = ControlSpec.new(0, 3, "lin", 1, 0, ""),
+    type = "option",
+    options = {"Granular", "Stretch", "Looping Delay", "Spectral"},
   }
 
   local fb_control = {
     id = id_prefix .. "_fb",
     name = "Feedback",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.7, ""),
+    controlspec = Controlspecs.mix(0.7)
   }
 
 

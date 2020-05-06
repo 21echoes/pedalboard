@@ -36,47 +36,47 @@ function RingsPedal.params()
     id = id_prefix .. "_pit",
     name = "Pitch",
     type = "control",
-    controlspec = ControlSpec.new(0, 127, "lin", 1, 60, ""),
+    controlspec = controlspec.MIDINOTE 
   }
   local structure_control = {
     id = id_prefix .. "_structure",
     name = "Structure",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.28, ""),
+    controlspec = Controlspecs.mix(0.28),
   }
   local brightness_control = {
     id = id_prefix .. "_bright",
     name = "Brightness",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.65, ""),
+    controlspec = Controlspecs.mix(0.65),
   }
 
   local damp_control = {
     id = id_prefix .. "_damp",
     name = "Damping",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.4, ""),
+    controlspec = Controlspecs.mix(0.4),
   }
 
   local position_control = {
     id = id_prefix .. "_pos",
     name = "Position",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.2, ""),
+    controlspec = Controlspecs.mix(0.2),
   }
 
   local model_control = {
     id = id_prefix .. "_model",
     name = "Model",
-    type = "control",
-    controlspec = ControlSpec.new(0, 5, "lin", 1, 0, ""),
+    type = "option",
+    options = {"Modal Resonator", "Sympathetic String", "Modulated/Inharmonic String", "2-Op FM Voice", "Sympathetic String Quantized", "String and Reverb"},
   }
 
   local easteregg_control = {
     id = id_prefix .. "_easteregg",
     name = "EasterEgg",
     type = "control",
-    controlspec = ControlSpec.new(0, 1, "lin", 1, 0, ""),
+    controlspec = Controlspecs.mix(0),
   }
 
 
