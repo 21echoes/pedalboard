@@ -81,7 +81,8 @@ end
 -- Interactions
 function key(n, z)
   -- All key presses are routed to the current page's class.
-  screen_dirty = current_page():key(n, z)
+  local screen_dirty = false
+  if current_page() then screen_dirty = current_page():key(n, z) end
   ScreenState.mark_screen_dirty(screen_dirty)
 end
 
@@ -90,11 +91,12 @@ function enc(n, delta)
     -- E1 changes page
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
     _set_encoder_sensitivities()
-    current_page():enter()
+    if current_page() then current_page():enter() end
     ScreenState.mark_screen_dirty(true)
   else
     -- Other encoders are routed to the current page's class
-    screen_dirty = current_page():enc(n, delta)
+    local screen_dirty = false
+    if current_page() then screen_dirty = current_page():enc(n, delta) end
     ScreenState.mark_screen_dirty(screen_dirty)
   end
 end
@@ -112,7 +114,7 @@ function redraw()
 
   -- Redraw both our content and the current page's content
   pages:redraw()
-  current_page():redraw()
+  if current_page() then current_page():redraw() end
 
   screen.update()
 end
@@ -136,12 +138,13 @@ end
 
 -- Utils
 function current_page()
+  if pages_table == nil or pages == nil then return nil end
   return pages_table[pages.index]
 end
 
 function set_page_index(new_page_index)
   pages:set_index(new_page_index)
-  current_page():enter()
+  if current_page() then current_page():enter() end
   _set_encoder_sensitivities()
   ScreenState.mark_screen_dirty(true)
 end
