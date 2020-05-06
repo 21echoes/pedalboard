@@ -75,8 +75,8 @@ function RingsPedal.params()
   local easteregg_control = {
     id = id_prefix .. "_easteregg",
     name = "EasterEgg",
-    type = "control",
-    controlspec = Controlspecs.mix(0),
+    type = "option",
+    options = {"FX_FORMANT", "FX_CHORUS", "FX_REVERB","FX_FORMANT","FX_ENSEMBLE", "FX_REVERB"},
   }
 
 
