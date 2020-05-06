@@ -76,7 +76,7 @@ function RingsPedal.params()
     id = id_prefix .. "_easteregg",
     name = "EasterEgg",
     type = "option",
-    options = {"FX_FORMANT", "FX_CHORUS", "FX_REVERB","FX_FORMANT","FX_ENSEMBLE", "FX_REVERB"},
+    options = {"Off", "On"},
   }
 
 
