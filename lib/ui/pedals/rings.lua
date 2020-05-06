@@ -39,7 +39,7 @@ function RingsPedal.params()
     controlspec = ControlSpec.new(0, 127, "lin", 1, 60, ""),
   }
   local structure_control = {
-    id = id_prefix .. "_struct",
+    id = id_prefix .. "_structure",
     name = "Structure",
     type = "control",
     controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.28, ""),
