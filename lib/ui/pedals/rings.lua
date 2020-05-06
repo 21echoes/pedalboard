@@ -16,8 +16,8 @@ function RingsPedal:new(bypass_by_default)
   self.__index = self
 
   i.sections = {
-    {"Pitch/Struct", "Bright/Damp"}, 
-    {"Position", "Model/EasterEgg"},
+    {"Pitch/Struct", "Bright/Damp"},
+    {"Position", "Model/Alt"},
     i:_default_section(),
   }
   i:_complete_initialization()
@@ -26,7 +26,7 @@ function RingsPedal:new(bypass_by_default)
 end
 
 function RingsPedal:name(short)
-  return short and "RNGS" or "Rings"
+  return short and "RNGS" or "MI Rings"
 end
 
 function RingsPedal.params()
@@ -36,49 +36,51 @@ function RingsPedal.params()
     id = id_prefix .. "_pit",
     name = "Pitch",
     type = "control",
-    controlspec = ControlSpec.new(0, 127, "lin", 1, 60, ""),
+    -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
+    controlspec = ControlSpec.new(24, 103, "lin", 1, 60, ""), -- c3 by default
   }
   local structure_control = {
     id = id_prefix .. "_struct",
     name = "Structure",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.28, ""),
+    controlspec = Controlspecs.mix(28),
   }
   local brightness_control = {
     id = id_prefix .. "_bright",
     name = "Brightness",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.65, ""),
+    controlspec = Controlspecs.MIX,
   }
 
   local damp_control = {
     id = id_prefix .. "_damp",
     name = "Damping",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.4, ""),
+    controlspec = Controlspecs.MIX,
   }
 
   local position_control = {
     id = id_prefix .. "_pos",
     name = "Position",
     type = "control",
-    controlspec = ControlSpec.new(0.00, 1.00, "lin", 0.01, 0.2, ""),
+    controlspec = Controlspecs.mix(33),
   }
 
   local model_control = {
     id = id_prefix .. "_model",
     name = "Model",
-    type = "control",
-    controlspec = ControlSpec.new(0, 5, "lin", 1, 0, ""),
+    type = "option",
+    options = {"Modal", "Sym. Strings", "String", "FM", "Chords", "Karplusverb"},
   }
 
+  -- TODO: changing mode should rename the tabs to match what the controls do in the new mode
+  -- also, show different words for the models?
   local easteregg_control = {
     id = id_prefix .. "_easteregg",
-    name = "EasterEgg",
-    type = "control",
-    controlspec = ControlSpec.new(0, 1, "lin", 1, 0, ""),
+    name = "Disastrous Peace",
+    type = "option",
+    options = {"Off", "On"},
   }
-
 
   return {
     {{pitch_control, structure_control}, {brightness_control, damp_control}},
