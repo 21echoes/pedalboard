@@ -17,7 +17,8 @@ function CloudsPedal:new(bypass_by_default)
 
   i.sections = {
     {"Pitch/Pos", "Size/Density"},
-    {"Texture/Stereo", "Fdbk/Mode"},
+    {"Texture/Stereo", "Fdbk/Freeze"},
+    {"Fidelity & Mode"}
     i:_default_section(),
   }
   i:_complete_initialization()
@@ -74,6 +75,18 @@ function CloudsPedal.params()
     type = "control",
     controlspec = Controlspecs.mix(20),
   }
+  local freeze_control = {
+    id = id_prefix .. "_freeze",
+    name = "Freeze",
+    type = "option",
+    options = {"Off", "Frozen"},
+  }
+  local lofi_control = {
+    id = id_prefix .. "_lofi",
+    name = "Fidelity",
+    type = "option",
+    options = {"Hi-Fi", "Lo-Fi"},
+  }
   -- TODO: changing mode should rename the tabs to match what the controls do in the new mode
   local mode_control = {
     id = id_prefix .. "_mode",
@@ -82,11 +95,10 @@ function CloudsPedal.params()
     options = {"Granular", "Pitch Shift", "Looper", "Spectral"}
   }
 
-  -- TODO: add lofi and freeze
-
   return {
     {{pitch_control, pos_control}, {size_control, dens_control}},
-    {{tex_control, spread_control}, {fb_control, mode_control}},
+    {{tex_control, spread_control}, {fb_control, freeze_control}},
+    {{lofi_control, mode_control}},
     Pedal._default_params(id_prefix),
   }
 end
