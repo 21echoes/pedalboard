@@ -15,12 +15,37 @@ function CloudsPedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
-  i.sections = {
-    {"Pitch/Pos", "Size/Density"},
-    {"Texture/Stereo", "Fdbk/Freeze"},
-    {"Fidelity & Mode"}
-    i:_default_section(),
+  i._sections_by_mode = {
+    -- Granular
+    {
+      {"Pitch/Pos", "Size/Density"},
+      {"Texture/Stereo", "Fdbk/Freeze"},
+      {"Fidelity & Mode"},
+      i:_default_section(),
+    },
+    -- Pitch Shift
+    {
+      {"Pitch/Pos", "Size/Diffuse"},
+      {"Tone/Stereo", "Fdbk/Freeze"},
+      {"Fidelity & Mode"},
+      i:_default_section(),
+    },
+    -- Looper
+    {
+      {"Pitch/Pos", "Size/Diffuse"},
+      {"Tone/Stereo", "Fdbk/Freeze"},
+      {"Fidelity & Mode"},
+      i:_default_section(),
+    },
+    -- Spectral
+    {
+      {"Pitch/Buf", "Warp/Smear"},
+      {"Noise/Stereo", "Fdbk/Capture"},
+      {"Fidelity & Mode"},
+      i:_default_section(),
+    },
   }
+  i.sections = i._sections_by_mode[1]
   i:_complete_initialization()
 
   return i
@@ -87,7 +112,6 @@ function CloudsPedal.params()
     type = "option",
     options = {"Hi-Fi", "Lo-Fi"},
   }
-  -- TODO: changing mode should rename the tabs to match what the controls do in the new mode
   local mode_control = {
     id = id_prefix .. "_mode",
     name = "Mode",
@@ -103,5 +127,9 @@ function CloudsPedal.params()
   }
 end
 
+function CloudsPedal:_update_section()
+  self.sections = self._sections_by_mode[params:get(self.id.."_mode")]
+  Pedal._update_section(self)
+end
 
 return CloudsPedal
