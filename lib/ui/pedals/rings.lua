@@ -2,6 +2,7 @@
 -- @classmod RingsPedal
 
 local ControlSpec = require "controlspec"
+local MusicUtil = require "musicutil"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
 local Controlspecs = include("lib/ui/util/controlspecs")
@@ -47,6 +48,7 @@ function RingsPedal.params()
     id = id_prefix .. "_pit",
     name = "Pitch",
     type = "control",
+    formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
     -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
     controlspec = ControlSpec.new(24, 103, "lin", 1, 60, ""), -- c3 by default
   }
@@ -131,6 +133,15 @@ function RingsPedal:_set_value_from_param_value(param_id, value)
     model_widget.text = easter_egg_modes[params:get(model_param_id)]
     ScreenState.mark_screen_dirty(true)
     self:_message_engine_for_param_change(param_id, value - 1)
+    return
+  end
+  local pitch_param_id = self.id .. "_pit"
+  if param_id == pitch_param_id then
+    local pitch_widget = self._param_id_to_widget[param_id]
+    pitch_widget:set_value(value)
+    pitch_widget.title = MusicUtil.note_num_to_name(value, true)
+    ScreenState.mark_screen_dirty(true)
+    self:_message_engine_for_param_change(param_id, value)
     return
   end
   Pedal._set_value_from_param_value(self, param_id, value)

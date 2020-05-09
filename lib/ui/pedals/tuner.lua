@@ -57,6 +57,7 @@ function TunerPedal.params()
     id = id_prefix .. "_test_tone_note",
     name = "Test Tone Note",
     type = "control",
+    formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
     -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
     controlspec = ControlSpec.new(24, 103, "lin", 1, 69, ""), -- a3 by default
   }
