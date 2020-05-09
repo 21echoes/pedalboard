@@ -17,22 +17,46 @@ function RingsPedal:new(bypass_by_default)
   setmetatable(i, self)
   self.__index = self
 
-  i._sections_by_mode = {
-    -- Default
+  i._sections_by_follow_and_mode = {
+    -- Free pitch
     {
-      {"Pitch/Struct", "Bright/Damp"},
-      {"Pos/Poly", "Model/Alt"},
-      i:_default_section(),
+      -- Default
+      {
+        {"Pitch/Follow", "Structure"},
+        {"Bright/Damp", "Pos/Poly"},
+        {"Model/Alt"},
+        i:_default_section(),
+      },
+      -- Disastrous Peace
+      {
+        {"Pitch/Follow", "Chord"},
+        {"Bright/Damp", "FX Amt/Poly"},
+        {"FX Type/Alt"},
+        i:_default_section(),
+      },
     },
-    -- Disastrous Peace
+    -- Follow with interval
     {
-      {"Pitch/Chord", "Bright/Damp"},
-      {"FX Amt/Poly", "FX Type/Alt"},
-      i:_default_section(),
+      -- Default
+      {
+        {"Intvl/Follow", "Structure"},
+        {"Bright/Damp", "Pos/Poly"},
+        {"Model/Alt"},
+        i:_default_section(),
+      },
+      -- Disastrous Peace
+      {
+        {"Intvl/Follow", "Chord"},
+        {"Bright/Damp", "FX Amt/Poly"},
+        {"FX Type/Alt"},
+        i:_default_section(),
+      },
     },
   }
-  i.sections = i._sections_by_mode[1]
+  i.sections = i._sections_by_follow_and_mode[2][1]
   i:_complete_initialization()
+  i._param_id_to_widget[i.id .. "_interval"]:set_marker_position(1, 0)
+  i._param_id_to_widget[i.id .. "_interval"].start_value = 0
 
   return i
 end
@@ -52,11 +76,24 @@ function RingsPedal.params()
     -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
     controlspec = ControlSpec.new(24, 103, "lin", 1, 60, ""), -- c3 by default
   }
+  local interval_control = {
+    id = id_prefix .. "_interval",
+    name = "Interval",
+    type = "control",
+    controlspec = ControlSpec.new(-24, 24, "lin", 1, 0, "st"),
+  }
+  local follow_control = {
+    id = id_prefix .. "_follow",
+    name = "Follow Pitch?",
+    type = "option",
+    options = {"Free", "Follow"},
+    default = 2,
+  }
   local structure_control = {
     id = id_prefix .. "_struct",
     name = "Structure",
     type = "control",
-    controlspec = Controlspecs.mix(28),
+    controlspec = Controlspecs.mix(36),
   }
   local brightness_control = {
     id = id_prefix .. "_bright",
@@ -96,14 +133,76 @@ function RingsPedal.params()
   }
 
   return {
-    {{pitch_control, structure_control}, {brightness_control, damp_control}},
-    {{position_control, poly_control}, {model_control, easteregg_control}},
+    {{interval_control, pitch_control, follow_control}, {structure_control}},
+    {{brightness_control, damp_control}, {position_control, poly_control}},
+    {{model_control, easteregg_control}},
     Pedal._default_params(id_prefix),
   }
 end
 
+function RingsPedal:_position_for_widget(section_index, tab_index, widget_index, widget_type)
+  -- Treat freq as if it was at widget_index 1 and follow as if it was at widget index 2
+  if section_index == 1 and tab_index == 1 and widget_index > 1 then
+    widget_index = widget_index - 1
+  end
+  return Pedal._position_for_widget(self, section_index, tab_index, widget_index, widget_type)
+end
+
+function RingsPedal:enc(n, delta)
+  -- Select which of interval or freq to message, and route to follow correctly
+  if self.section_index == 1 and self.tabs.index == 1 then
+    local showing_freq = params:get(self.id .. "_follow") == 1
+    local widget_index = n - 1
+    if showing_freq or widget_index ~= 1 then
+      widget_index = widget_index + 1
+    end
+    param_id = self._param_ids[self.section_index][self.tabs.index][widget_index]
+    params:delta(param_id, delta)
+    return true
+  end
+  return Pedal.enc(self, n, delta)
+end
+
+function RingsPedal:redraw()
+  -- subtly adapted from Pedal:redraw so that we skip drawing the hidden widget
+  local showing_freq = params:get(self.id .. "_follow") == 1
+  for tab_index, tab in ipairs(self._widgets[self.section_index]) do
+    for widget_index, widget in ipairs(tab) do
+      local skip_redraw = false
+      if self.section_index == 1 and tab_index == 1 then
+        skip_redraw = (widget_index == 1 and showing_freq) or (widget_index == 2 and not showing_freq)
+      end
+      if not skip_redraw then
+        widget:redraw()
+      end
+    end
+  end
+
+  -- The remainder is identical to Pedal:redraw
+  self.tabs:redraw()
+  -- Left arrow when there's a section to our left
+  if self.section_index > 1 then
+    screen.move(0, 6)
+    screen.level(3)
+    screen.text("<")
+  end
+  -- Right arrow when there's a section to our left
+  if self.section_index < #self.sections then
+    screen.move(128, 6)
+    screen.level(3)
+    screen.text_right(">")
+  end
+  -- Name of pedal at the bottom, leaving room for the descender
+  screen.move(64, 62)
+  screen.level(15)
+  screen.text_center(self:name())
+  -- Prevent a stray line being drawn
+  screen.stroke()
+end
+
+
 function RingsPedal:_update_section()
-  self.sections = self._sections_by_mode[params:get(self.id.."_easteregg")]
+  self.sections = self._sections_by_follow_and_mode[params:get(self.id.."_follow")][params:get(self.id.."_easteregg")]
   Pedal._update_section(self)
 end
 
@@ -143,6 +242,9 @@ function RingsPedal:_set_value_from_param_value(param_id, value)
     ScreenState.mark_screen_dirty(true)
     self:_message_engine_for_param_change(param_id, value)
     return
+  end
+  if param_id == self.id .. "_follow" then
+    self:_update_section()
   end
   Pedal._set_value_from_param_value(self, param_id, value)
 end

@@ -47,6 +47,8 @@ function CloudsPedal:new(bypass_by_default)
   }
   i.sections = i._sections_by_mode[1]
   i:_complete_initialization()
+  i._param_id_to_widget[i.id .. "_pit"]:set_marker_position(1, 0)
+  i._param_id_to_widget[i.id .. "_pit"].start_value = 0
 
   return i
 end
