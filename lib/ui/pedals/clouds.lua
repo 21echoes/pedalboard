@@ -5,6 +5,7 @@ local ControlSpec = require "controlspec"
 local UI = require "ui"
 local Pedal = include("lib/ui/pedals/pedal")
 local Controlspecs = include("lib/ui/util/controlspecs")
+local ScreenState = include("lib/ui/util/screen_state")
 
 local CloudsPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
@@ -132,6 +133,25 @@ end
 function CloudsPedal:_update_section()
   self.sections = self._sections_by_mode[params:get(self.id.."_mode")]
   Pedal._update_section(self)
+end
+
+function CloudsPedal:_set_value_from_param_value(param_id, value)
+  if param_id == self.id .. "_dens" and params:get(self.id.."_mode") == 1 then
+    local dens_dial = self._param_id_to_widget[param_id]
+    dens_dial:set_value(value)
+    -- Explain the way the density param works
+    if value == 50 then
+      dens_dial.title = "Off"
+    elseif value < 50 then
+      dens_dial.title = "Reg: "..((50 - value) * 2)
+    else
+      dens_dial.title = "Rnd: "..((value - 50) * 2)
+    end
+    ScreenState.mark_screen_dirty(true)
+    self:_message_engine_for_param_change(param_id, value)
+    return
+  end
+  Pedal._set_value_from_param_value(self, param_id, value)
 end
 
 return CloudsPedal
