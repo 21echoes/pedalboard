@@ -9,6 +9,10 @@ local Controlspecs = include("lib/ui/util/controlspecs")
 local ReverbPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 ReverbPedal.id = "reverb"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+ReverbPedal.peak_cpu = 31
 
 function ReverbPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)

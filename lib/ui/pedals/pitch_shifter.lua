@@ -10,6 +10,10 @@ local JustIntonation = include("lib/ui/util/just_intonation")
 local PitchShifterPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 PitchShifterPedal.id = "pitchshifter"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+PitchShifterPedal.peak_cpu = 1
 
 local SEMITONE = math.pow(2, 1/12)
 local CENT = math.pow(2, 1/1200)

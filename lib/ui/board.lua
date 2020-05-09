@@ -6,6 +6,7 @@ local UI = require "ui"
 local tabutil = require "tabutil"
 local Controlspecs = include("lib/ui/util/controlspecs")
 local ScreenState = include("lib/ui/util/screen_state")
+local Alert = include("lib/ui/util/alert")
 
 -- All possible pedals, ordered by something like how common they are
 local pedal_classes = {
@@ -40,6 +41,8 @@ for i, pedal_class in ipairs(pedal_classes) do
   table.insert(pedal_names, pedal_class:name())
 end
 local CLICK_DURATION = 0.7
+local CPU_BASELINE = 8
+local CPU_ALERT_THRESHOLD = 70
 
 local Board = {}
 
@@ -68,6 +71,8 @@ function Board:new(
   i._alt_key_down_time = nil
   i._alt_action_taken = false
   i._add_bypassed = false
+  i._cpu_alert = nil
+  i._cpu_alert_pedal = nil
   i:_setup_tabs()
   i:_add_param_actions()
 
@@ -142,6 +147,24 @@ function Board:enter()
 end
 
 function Board:key(n, z)
+  -- While showing the CPU alert, K2 cancels, K3 confirms
+  if self._cpu_alert ~= nil then
+    if z ~= 1 then return false end
+    if n == 2 then
+      self._cpu_alert = nil
+      self._cpu_alert_pedal = nil
+      return true
+    elseif n == 3 then
+      local param_value = self._cpu_alert_pedal[1]
+      local index = self._cpu_alert_pedal[2]
+      self._cpu_alert = nil
+      self._cpu_alert_pedal = nil
+      params:set("pedal_" .. index, param_value)
+      return true
+    end
+    return false
+  end
+
   if n == 2 then
     -- Key down on K2 enables alt mode
     if z == 1 then
@@ -207,17 +230,27 @@ function Board:key(n, z)
 
     -- We're on the new slot, so add the pending pedal
     if self:_is_new_slot(self.tabs.index) then
-      params:set("pedal_" .. self.tabs.index, param_value)
+      local would_push_cpu = self:_check_cpu_load(param_value, self.tabs.index)
+      if would_push_cpu then
+        self:_show_cpu_alert(param_value, self.tabs.index)
+      else
+        params:set("pedal_" .. self.tabs.index, param_value)
+      end
       return true
     end
 
     -- We're on an existing slot, and the pending pedal type is different than the current type
     if self:_slot_has_pending_switch(self.tabs.index) then
-      if param_value == 1 then
-        -- If we're removing a pedal, we're going to need to do some local->param syncing
-        self._manual_action_will_require_param_sync = true
+      local would_push_cpu = self:_check_cpu_load(param_value, self.tabs.index)
+      if would_push_cpu then
+        self:_show_cpu_alert(param_value, self.tabs.index)
+      else
+        if param_value == 1 then
+          -- If we're removing a pedal, we're going to need to do some local->param syncing
+          self._manual_action_will_require_param_sync = true
+        end
+        params:set("pedal_" .. self.tabs.index, param_value)
       end
-      params:set("pedal_" .. self.tabs.index, param_value)
       return true
     end
   end
@@ -226,6 +259,8 @@ function Board:key(n, z)
 end
 
 function Board:enc(n, delta)
+  -- Encoders do nothing while showing the CPU alert
+  if self._cpu_alert ~= nil then return false end
   if n == 2 then
     -- Alt+E2 re-orders pedals
     if self:_is_alt_mode() then
@@ -323,6 +358,9 @@ function Board:redraw()
       end
     end
     self:_render_tab_content(render_index)
+  end
+  if self._cpu_alert ~= nil then
+    self._cpu_alert:redraw()
   end
 end
 
@@ -636,6 +674,57 @@ function Board:_sync_pedals_to_params(force)
     -- Instead, sync params once we're back in this app (detected via a call to redraw)
     self._sync_to_params_on_next_redraw = true
   end
+end
+
+function Board:_check_cpu_load(param_value, pedal_index)
+  if param_value == 1 then return false end
+  local cpu_load_before = 0
+  for i, pedal in ipairs(self.pedals) do
+    cpu_load_before = cpu_load_before + pedal.peak_cpu
+  end
+  local cpu_load_after = 0
+  for i, pedal in ipairs(self.pedals) do
+    local pedal_to_use = i == pedal_index and pedal_classes[param_value - 1] or pedal
+    cpu_load_after = cpu_load_after + pedal_to_use.peak_cpu
+  end
+  if pedal_index > #self.pedals then
+    cpu_load_after = cpu_load_after + pedal_classes[param_value - 1].peak_cpu
+  end
+  if cpu_load_after > cpu_load_before and (cpu_load_after + CPU_BASELINE) > CPU_ALERT_THRESHOLD then
+    return true
+  end
+end
+
+function Board:_show_cpu_alert(param_value, pedal_index)
+  if param_value == 1 then return end
+  local cpu_explanations = {"", ""}
+  for i, pedal in ipairs(self.pedals) do
+    local pedal_to_use = i == pedal_index and pedal_classes[param_value - 1] or pedal
+    local explanations_index = math.ceil(i / 2)
+    local cpu_explanation = cpu_explanations[explanations_index]
+    cpu_explanation = cpu_explanation .. pedal_to_use:name(true) .. ": " .. pedal_to_use.peak_cpu .. "% CPU"
+    if i < #self.pedals then cpu_explanation = cpu_explanation .. ", " end
+    cpu_explanations[explanations_index] = cpu_explanation
+  end
+  if pedal_index > #self.pedals then
+    local pedal_to_use = pedal_classes[param_value - 1]
+    local explanations_index = math.ceil(pedal_index / 2)
+    local cpu_explanation = cpu_explanations[explanations_index]
+    if string.len(cpu_explanation) > 0 then
+      cpu_explanation = cpu_explanation .. ", "
+    end
+    cpu_explanation = cpu_explanation .. pedal_to_use:name(true) .. ": " .. pedal_to_use.peak_cpu .. "% CPU"
+    cpu_explanations[explanations_index] = cpu_explanation
+  end
+  local lines = {"May cause dropped samples:"}
+  for i, cpu_explanation in ipairs(cpu_explanations) do
+    if string.len(cpu_explanation) > 0 then
+      table.insert(lines, cpu_explanation)
+    end
+  end
+  table.insert(lines, "Are you sure? K3 to confirm.")
+  self._cpu_alert = Alert.new(lines)
+  self._cpu_alert_pedal = {param_value, pedal_index}
 end
 
 return Board

@@ -97,6 +97,9 @@ Engine_Pedalboard : CroneEngine {
     this.buildNoPedalState;
 
     // TODO: before outs, put a basic Limiter.ar(mixdown, 1.0) ?
+
+    // Use this line to test CPU load:
+    // fork { loop { [context.server.peakCPU, context.server.avgCPU].postln; 3.wait } };
   }
 
   buildNoPedalState {

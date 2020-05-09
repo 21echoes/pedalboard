@@ -8,6 +8,10 @@ local Controlspecs = include("lib/ui/util/controlspecs")
 local LoFiPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 LoFiPedal.id = "lofi"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+LoFiPedal.peak_cpu = 6
 
 function LoFiPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)
