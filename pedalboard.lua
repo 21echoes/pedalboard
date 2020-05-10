@@ -46,6 +46,9 @@ function init()
   screen.aa(0)
   screen.line_width(1)
 
+  -- Some pedals have requirements that may not be satisfied. Check for them now
+  Board:add_optional_pedals_if_ready()
+
   -- Set up params (delegate to the Board class)
   params:add_separator("Pedalboard")
   Board:add_params()

@@ -8,6 +8,7 @@ local Label = include("lib/ui/util/label")
 
 local Pedal = {}
 Pedal.id = "pedal"
+Pedal.required_files = {}
 
 function Pedal:new(bypass_by_default)
   i = {}

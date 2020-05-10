@@ -15,6 +15,11 @@ RingsPedal.id = "rings"
 -- Measure with only this pedal on the board, playing in some audio,
 -- collect a few samples, and subtract 8 from the max value you see (and round up!)
 RingsPedal.peak_cpu = 24
+RingsPedal.required_files = {
+  "/home/we/.local/share/SuperCollider/Extensions/MiRings/MiRings.cpp",
+  "/home/we/.local/share/SuperCollider/Extensions/MiRings/MiRings.sc",
+  "/home/we/.local/share/SuperCollider/Extensions/MiRings/MiRings.so",
+}
 
 function RingsPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)

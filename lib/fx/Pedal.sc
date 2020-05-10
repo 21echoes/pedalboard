@@ -7,6 +7,8 @@ Pedal {
     ^this.subclassResponsibility(thisMethod);
   }
 
+  *addOnBoot { ^true; }
+
   *fxArguments {
     // Override this function to define your pedal's specific arguments (e.g., [\tone]);
     // These should match the custom parameters defined and managed in your Lua pedal file.

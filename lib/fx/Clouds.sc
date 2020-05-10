@@ -1,5 +1,6 @@
 CloudsPedal : Pedal {
   *id { ^\clouds; }
+  *addOnBoot { ^false; }
 
   *fxArguments { ^[\pit, \pos, \size, \dens, \tex, \spread, \fb, \freeze, \lofi, \mode]; }
 

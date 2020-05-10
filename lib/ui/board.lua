@@ -7,6 +7,7 @@ local tabutil = require "tabutil"
 local Controlspecs = include("lib/ui/util/controlspecs")
 local ScreenState = include("lib/ui/util/screen_state")
 local Alert = include("lib/ui/util/alert")
+local OptionalPedals = include("lib/ui/util/optional_pedals")
 
 -- All possible pedals, ordered by something like how common they are
 local pedal_classes = {
@@ -31,6 +32,8 @@ local pedal_classes = {
   include("lib/ui/pedals/amp_simulator"),
   include("lib/ui/pedals/equalizer"),
   include("lib/ui/pedals/tuner"),
+}
+local optional_pedal_classes = {
   include("lib/ui/pedals/rings"),
   include("lib/ui/pedals/clouds"),
 }
@@ -77,6 +80,16 @@ function Board:new(
   i:_add_param_actions()
 
   return i
+end
+
+function Board:add_optional_pedals_if_ready()
+  for i, pedal_class in ipairs(optional_pedal_classes) do
+    local pedal_added = OptionalPedals.add_if_ready(pedal_class)
+    if pedal_added then
+      table.insert(pedal_classes, pedal_class)
+      table.insert(pedal_names, pedal_class:name())
+    end
+  end
 end
 
 function Board:add_params()

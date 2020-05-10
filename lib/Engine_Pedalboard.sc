@@ -2,6 +2,7 @@ Engine_Pedalboard : CroneEngine {
   var allPedalDefinitions;
   var allPedalIds;
   var boardIds;
+  var optionalPedalLookup;
   var pedalDetails;
   var buses;
   var passThru;
@@ -43,9 +44,14 @@ Engine_Pedalboard : CroneEngine {
       WavefolderPedal,
     ];
     allPedalIds = List.new;
+    optionalPedalLookup = Dictionary.new;
     pedalDetails = Dictionary.new;
     allPedalDefinitions.do({|pedalDefinition|
-      pedalDefinition.addDef(context);
+      if (pedalDefinition.addOnBoot, {
+        pedalDefinition.addDef(context);
+      }, {
+        optionalPedalLookup[pedalDefinition.id] = pedalDefinition;
+      });
       allPedalIds.add(pedalDefinition.id);
       pedalDetails[pedalDefinition.id] = Dictionary.new;
       pedalDetails[pedalDefinition.id][\arguments] = Dictionary.new;
@@ -86,6 +92,7 @@ Engine_Pedalboard : CroneEngine {
     ], inputStage, \addAfter);
 
     // Set up commands for board management
+    this.addCommand("add_pedal_definition", "s", {|msg| this.addPedalDefinition(msg[1]);});
     this.addCommand("add_pedal", "s", {|msg| this.addPedal(msg[1]);});
     this.addCommand("insert_pedal_at_index", "is", {|msg| this.insertPedalAtIndex(msg[1], msg[2]);});
     this.addCommand("remove_pedal_at_index", "i", {|msg| this.removePedalAtIndex(msg[1]);});
@@ -109,6 +116,10 @@ Engine_Pedalboard : CroneEngine {
       \inR, buses[0].index + 1,
       \out, buses[1].index,
     ], inputStage, \addAfter);
+  }
+
+  addPedalDefinition {|pedalId|
+    optionalPedalLookup[pedalId].addDef(context);
   }
 
   addPedal {|pedalId|

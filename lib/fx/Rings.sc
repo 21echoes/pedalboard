@@ -1,5 +1,6 @@
 RingsPedal : Pedal {
   *id { ^\rings; }
+  *addOnBoot { ^false; }
 
   *fxArguments { ^[\pit, \follow, \interval, \struct, \bright, \damp, \pos, \poly, \model, \easteregg]; }
 
