@@ -19,6 +19,10 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
+-- To enable Mutable Instruments
+--  pedals, follow instructions
+--  at llllllll.co/t/31781
+--
 -- v1.3.0 @21echoes
 
 engine.name = "Pedalboard"

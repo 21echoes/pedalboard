@@ -9,11 +9,22 @@ A simple collection of chainable effects for the Norns sound computer.
 * Tremolo
 * Distortion
 * Flanger
+* Phaser
 * Compressor
 * Sustain
 * Bitcrusher
+* Wavefolder
+* Ring Modulator
+* Pitch Shifter
+* Sub Boost
+* Vibrato
+* Auto-Wah
+* Lo-Fi
+* Amp Simulator
 * Equalizer
 * Tuner
+* Mutable Instruments Clouds (follow instructions at https://llllllll.co/t/31781)
+* Mutable Instruments Rings (follow instructions at https://llllllll.co/t/31781)
 * More to come in future versions! File a GitHub issue with recommendations, or join the discussion at [Lines](https://llllllll.co/t/pedalboard-chainable-fx-for-norns/31119/27)
 
 ## UI & Controls
@@ -49,16 +60,14 @@ A simple collection of chainable effects for the Norns sound computer.
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
 * Reset after installs or updates (this is a new Engine)
+* Optional: Follow instructions at https://llllllll.co/t/31781 to enable the Mutable Instruments pedals (Clouds & Rings)
 
 ## Roadmap
 Film a brief demo video showing how it works
 
 ### More Pedals!
-* Pitch Shifter (params: Interval, Fine)
-* Phaser (params: Rez, Rate, Depth, Sweep?)
-* Auto-Wah (params: Depth, Rate, Sensitivity, Mode)
-* Vibrato (params: Rate, Depth)
-* Eventually: Noise Gate, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
+* Freezer/Looper
+* Stutter
 
 ### Better Pedals!
 * Multi-tap, Varispeed, and Slapback delays
