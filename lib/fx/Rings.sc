@@ -11,9 +11,9 @@ RingsPedal : Pedal {
     // Convert to pitch number
     followNote = max(0, min(127, floor((12 * log(followFreq / 440.0) / log(2)) + 69.5)));
     followNote = followNote + \interval.kr(0);
-    pit = Select.kr(\follow.kr(0), [\pit.kr(60), followNote]);
+    pit = Select.kr(\follow.kr(1), [\pit.kr(60), followNote]);
 
-    struct = \struct.kr(0.33);
+    struct = \struct.kr(0.36);
     bright = \bright.kr(0.5);
     damp = \damp.kr(0.5);
     pos = \pos.kr(0.33);

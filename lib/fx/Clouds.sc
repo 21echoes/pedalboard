@@ -12,7 +12,7 @@ CloudsPedal : Pedal {
     dens = \dens.kr(0.33);
     tex = \tex.kr(0.5);
     spread = \spread.kr(0);
-    fb = \fb.kr(0);
+    fb = \fb.kr(0.2);
     freeze = \freeze.kr(0);
     lofi = \lofi.kr(0);
     mode = \mode.kr(0);
