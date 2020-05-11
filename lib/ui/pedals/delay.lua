@@ -64,7 +64,7 @@ function DelayPedal.params()
     id = id_prefix .. "_mode",
     name = "Mode",
     type = "option",
-    options = {"Default", "Ping-Pong"},
+    options = {"Default", "Ping-Pong", "Slapback"},
   }
 
   return {

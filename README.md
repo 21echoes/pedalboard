@@ -61,7 +61,7 @@ Film a brief demo video showing how it works
 * Eventually: Noise Gate, Amp Simulator, Sub Boost, Wave Folder, Ring Mod, Freezer/Looper, Granulator, Stutter, etc.
 
 ### Better Pedals!
-* Multi-tap, Varispeed, and Slapback delays
+* Multi-tap and Varispeed delays
 * Spring and Plate reverbs
 * EQ shelves can be filters instead, and an additional peak EQ
 * Continued iteration on how the dials alter the effect

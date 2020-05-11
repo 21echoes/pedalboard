@@ -5,7 +5,7 @@ DelayPedal : Pedal {
 
   *fxDef {^{|wet|
     // Adapted from @carltesta's Manifold
-    // \mode selects: normal, ping-pong. Eventually: multi-tap, varispeed
+    // \mode selects: normal, ping-pong, or slapback. Eventually: multi-tap, varispeed
     var numChannels, minDelay, maxDelay, delayBuffers, feedbackBuses, time, changeDetector, feedback, mode;
     numChannels = 2;
     minDelay = 0.03;
@@ -21,16 +21,18 @@ DelayPedal : Pedal {
     mode = \mode.kr(0);
     wet = Array.fill(numChannels, {|cNum|
       var inputSignal, delayBuffer, busIndex, inputFeedbackBus, outputFeedbackBus, liveAndFeedback,
-      mainDelay, altDelay, fade, delayedSignal, quality, latchedTime, altLatchedTime;
+      mainDelay, altDelay, fade, delayedSignal, quality, latchedTime, altLatchedTime, feedbackOutputMul;
       inputSignal = Select.ar(mode, [
         wet[cNum],
         wet[(cNum + 1) % numChannels],
+        wet[cNum],
       ]);
       delayBuffer = delayBuffers[cNum];
       inputFeedbackBus = feedbackBuses[cNum].index;
       outputFeedbackBus = Select.kr(mode, [
         feedbackBuses[cNum].index,
         feedbackBuses[(cNum + 1) % numChannels].index,
+        feedbackBuses[cNum].index,
       ]);
       liveAndFeedback = inputSignal + InFeedback.ar(inputFeedbackBus);
 
@@ -82,7 +84,8 @@ DelayPedal : Pedal {
         BufDelayL.ar(delayBuffer, liveAndFeedback, altLatchedTime),
         MulAdd.new(Lag2.kr(changeDetector, 0.1), 2, 1.neg)
       );
-      Out.ar(outputFeedbackBus, delayedSignal);
+      feedbackOutputMul = Select.kr(mode, [1, 1, 0]);
+      Out.ar(outputFeedbackBus, delayedSignal * feedbackOutputMul);
       delayedSignal;
     });
   }}
