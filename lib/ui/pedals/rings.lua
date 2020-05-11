@@ -20,6 +20,13 @@ RingsPedal.required_files = {
   "/home/we/.local/share/SuperCollider/Extensions/MiRings/MiRings.sc",
   "/home/we/.local/share/SuperCollider/Extensions/MiRings/MiRings.so",
 }
+RingsPedal.engine_ready = false
+RingsPedal.requirements_failed_msg = {
+  "For instructions on how",
+  "to enable this pedal, check",
+  "https://llllllll.co/t/31781",
+  "Sleep & re-boot afterward!"
+}
 
 function RingsPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)

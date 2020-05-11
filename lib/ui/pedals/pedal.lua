@@ -9,6 +9,12 @@ local Label = include("lib/ui/util/label")
 local Pedal = {}
 Pedal.id = "pedal"
 Pedal.required_files = {}
+Pedal.engine_ready = true
+Pedal.requirements_failed_msg = {
+  "For instructions on how",
+  "to enable this pedal, check",
+  "https://llllllll.co/t/31781"
+}
 
 function Pedal:new(bypass_by_default)
   i = {}

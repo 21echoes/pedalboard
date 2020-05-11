@@ -19,6 +19,13 @@ CloudsPedal.required_files = {
   "/home/we/.local/share/SuperCollider/Extensions/MiClouds/MiClouds.sc",
   "/home/we/.local/share/SuperCollider/Extensions/MiClouds/MiClouds.so",
 }
+CloudsPedal.engine_ready = false
+CloudsPedal.requirements_failed_msg = {
+  "For instructions on how",
+  "to enable this pedal, check",
+  "https://llllllll.co/t/31781",
+  "Sleep & re-boot afterward!"
+}
 
 function CloudsPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)

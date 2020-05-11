@@ -29,13 +29,11 @@ local pedal_classes = {
   include("lib/ui/pedals/vibrato"),
   include("lib/ui/pedals/auto_wah"),
   include("lib/ui/pedals/lofi"),
+  include("lib/ui/pedals/rings"),
+  include("lib/ui/pedals/clouds"),
   include("lib/ui/pedals/amp_simulator"),
   include("lib/ui/pedals/equalizer"),
   include("lib/ui/pedals/tuner"),
-}
-local optional_pedal_classes = {
-  include("lib/ui/pedals/rings"),
-  include("lib/ui/pedals/clouds"),
 }
 local MAX_SLOTS = math.min(4, #pedal_classes)
 local EMPTY_PEDAL = "None"
@@ -74,7 +72,7 @@ function Board:new(
   i._alt_key_down_time = nil
   i._alt_action_taken = false
   i._add_bypassed = false
-  i._cpu_alert = nil
+  i._alert = nil
   i._cpu_alert_pedal = nil
   i:_setup_tabs()
   i:_add_param_actions()
@@ -83,12 +81,8 @@ function Board:new(
 end
 
 function Board:add_optional_pedals_if_ready()
-  for i, pedal_class in ipairs(optional_pedal_classes) do
-    local pedal_added = OptionalPedals.add_if_ready(pedal_class)
-    if pedal_added then
-      table.insert(pedal_classes, pedal_class)
-      table.insert(pedal_names, pedal_class:name())
-    end
+  for i, pedal_class in ipairs(pedal_classes) do
+    OptionalPedals.add_if_ready(pedal_class)
   end
 end
 
@@ -161,21 +155,30 @@ end
 
 function Board:key(n, z)
   -- While showing the CPU alert, K2 cancels, K3 confirms
-  if self._cpu_alert ~= nil then
+  if self._alert ~= nil then
     if z ~= 1 then return false end
-    if n == 2 then
-      self._cpu_alert = nil
-      self._cpu_alert_pedal = nil
-      return true
-    elseif n == 3 then
-      local param_value = self._cpu_alert_pedal[1]
-      local index = self._cpu_alert_pedal[2]
-      self._cpu_alert = nil
-      self._cpu_alert_pedal = nil
-      params:set("pedal_" .. index, param_value)
-      return true
+    if self._cpu_alert_pedal ~= nil then
+      if n == 2 then
+        self._alert = nil
+        self._cpu_alert_pedal = nil
+        return true
+      elseif n == 3 then
+        local param_value = self._cpu_alert_pedal[1]
+        local index = self._cpu_alert_pedal[2]
+        self._alert = nil
+        self._cpu_alert_pedal = nil
+        params:set("pedal_" .. index, param_value)
+        return true
+      end
+      return false
+    else
+      -- Dismiss other alerts with no side-effects
+      if n == 2 or n == 3 then
+        self._alert = nil
+        return true
+      end
+      return false
     end
-    return false
   end
 
   if n == 2 then
@@ -232,6 +235,13 @@ function Board:key(n, z)
     end
 
     local param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
+
+    -- If the pedal is not ready, show a message explaining how to set up the pedal
+    if add_or_switch and not self:_pending_pedal_class().engine_ready then
+      self._alert = Alert.new(self:_pending_pedal_class().requirements_failed_msg)
+      return true
+    end
+
     -- If we are in alt mode when adding or swapping a pedal, we want to make the new pedal already bypassed
     self._add_bypassed = false
     if self:_is_alt_mode() and param_value ~= 1 then
@@ -272,8 +282,8 @@ function Board:key(n, z)
 end
 
 function Board:enc(n, delta)
-  -- Encoders do nothing while showing the CPU alert
-  if self._cpu_alert ~= nil then return false end
+  -- Encoders do nothing while showing an alert
+  if self._alert ~= nil then return false end
   if n == 2 then
     -- Alt+E2 re-orders pedals
     if self:_is_alt_mode() then
@@ -372,8 +382,8 @@ function Board:redraw()
     end
     self:_render_tab_content(render_index)
   end
-  if self._cpu_alert ~= nil then
-    self._cpu_alert:redraw()
+  if self._alert ~= nil then
+    self._alert:redraw()
   end
 end
 
@@ -432,10 +442,12 @@ function Board:_render_tab_content(i)
         screen.text_center(self:_name_of_pending_pedal())
       else
         -- Render "Add {name of the new pedal}" as centered text
+        screen.level(self:_pending_pedal_class().engine_ready and 15 or 8)
         screen.move(center_x, center_y - 4)
         screen.text_center(self:_use_short_names() and "+" or "Add")
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
+        screen.level(15)
       end
       -- Prevent a stray line being drawn
       screen.stroke()
@@ -458,10 +470,12 @@ function Board:_render_tab_content(i)
         screen.text_center(use_short_names and "X" or "Remove")
       else
         -- Render "Switch to {name of the new pedal}" as centered text
+        screen.level(self:_pending_pedal_class().engine_ready and 15 or 8)
         screen.move(center_x, center_y - 4)
         screen.text_center(use_short_names and "->" or "Switch to")
         screen.move(center_x, center_y + 4)
         screen.text_center(self:_name_of_pending_pedal())
+        screen.level(15)
       end
       -- Prevent a stray line being drawn
       screen.stroke()
@@ -736,7 +750,7 @@ function Board:_show_cpu_alert(param_value, pedal_index)
     end
   end
   table.insert(lines, "Are you sure? K3 to confirm.")
-  self._cpu_alert = Alert.new(lines)
+  self._alert = Alert.new(lines)
   self._cpu_alert_pedal = {param_value, pedal_index}
 end
 
