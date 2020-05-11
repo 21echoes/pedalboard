@@ -9,6 +9,10 @@ local Controlspecs = include("lib/ui/util/controlspecs")
 local SubBoostPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 SubBoostPedal.id = "subboost"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+SubBoostPedal.peak_cpu = 6
 
 function SubBoostPedal:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)

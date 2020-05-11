@@ -12,6 +12,10 @@ local ScreenState = include("lib/ui/util/screen_state")
 local TunerPedal = Pedal:new()
 -- Must match this pedal's .sc file's *id
 TunerPedal.id = "tuner"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+TunerPedal.peak_cpu = 1
 
 function TunerPedal:new(bypass_by_default)
   -- Always bypass by default
@@ -57,6 +61,7 @@ function TunerPedal.params()
     id = id_prefix .. "_test_tone_note",
     name = "Test Tone Note",
     type = "control",
+    formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
     -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
     controlspec = ControlSpec.new(24, 103, "lin", 1, 69, ""), -- a3 by default
   }

@@ -11,6 +11,10 @@ local ScreenState = include("lib/ui/util/screen_state")
 local RingModulator = Pedal:new()
 -- Must match this pedal's .sc file's *id
 RingModulator.id = "ringmod"
+-- Measure this value by uncommenting the `...context.server.peakCPU...` line at the end of Engine_Pedalboard.alloc
+-- Measure with only this pedal on the board, playing in some audio,
+-- collect a few samples, and subtract 8 from the max value you see (and round up!)
+RingModulator.peak_cpu = 13
 
 function RingModulator:new(bypass_by_default)
   local i = Pedal:new(bypass_by_default)
@@ -91,7 +95,7 @@ end
 function RingModulator:enc(n, delta)
   -- Select which of interval or freq to message, and route to follow correctly
   if self.section_index == 1 and self.tabs.index == 1 then
-    local showing_freq = params:get(RingModulator.id .. "_follow") == 1
+    local showing_freq = params:get(self.id .. "_follow") == 1
     local widget_index = n - 1
     if showing_freq or widget_index ~= 1 then
       widget_index = widget_index + 1
@@ -105,7 +109,7 @@ end
 
 function RingModulator:redraw()
   -- subtly adapted from Pedal:redraw so that we skip drawing the hidden widget
-  local showing_freq = params:get(RingModulator.id .. "_follow") == 1
+  local showing_freq = params:get(self.id .. "_follow") == 1
   for tab_index, tab in ipairs(self._widgets[self.section_index]) do
     for widget_index, widget in ipairs(tab) do
       local skip_redraw = false

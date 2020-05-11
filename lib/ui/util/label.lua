@@ -1,4 +1,3 @@
-
 local Label = {}
 Label.__index = Label
 

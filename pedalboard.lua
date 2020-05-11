@@ -19,6 +19,10 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
+-- To enable Mutable Instruments
+--  pedals, follow instructions
+--  at llllllll.co/t/31781
+--
 -- v1.3.0 @21echoes
 
 engine.name = "Pedalboard"
@@ -45,6 +49,9 @@ function init()
   screen.level(15)
   screen.aa(0)
   screen.line_width(1)
+
+  -- Some pedals have requirements that may not be satisfied. Check for them now
+  Board:add_optional_pedals_if_ready()
 
   -- Set up params (delegate to the Board class)
   params:add_separator("Pedalboard")
