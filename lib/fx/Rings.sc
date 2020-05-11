@@ -9,7 +9,7 @@ RingsPedal : Pedal {
     # followFreq, freqClarity = Pitch.kr(wet[0], initFreq: 0, minFreq: 30, maxFreq: 4200, ampThreshold: 0.02, median: 7, clar: 1);
     followFreq = Select.kr(followFreq, [220, followFreq]);
     // Convert to pitch number
-    followNote = max(0, min(127, floor((12 * log(followFreq / 440.0) / log(2)) + 69.5)));
+    followNote = max(0, min(127, floor((12 * log(followFreq / 440.0) / log(2)) + 57.5)));
     followNote = followNote + \interval.kr(0);
     pit = Select.kr(\follow.kr(1), [\pit.kr(60), followNote]);
 
