@@ -526,7 +526,7 @@ function Board:_reorder_pedals()
   local pedal_instance_to_move = self.pedals[self._reorder_source]
 
   -- remove pedal at reorder_source
-  engine.remove_pedal_at_index(self._reorder_source - 1) -- The engine is zero-indexed
+  engine.remove_pedal_at_index(self._reorder_source - 1, 1) -- The engine is zero-indexed. Also, tell engine to not free the synth
   table.remove(self.pedals, self._reorder_source)
   self._remove_page(self._reorder_source + 1, false) -- The parent has a page for each pedal at 1 beyond the slot index on the board
 

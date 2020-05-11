@@ -86,7 +86,7 @@ Engine_Pedalboard : CroneEngine {
     // Set up commands for board management
     this.addCommand("add_pedal", "s", {|msg| this.addPedal(msg[1]);});
     this.addCommand("insert_pedal_at_index", "is", {|msg| this.insertPedalAtIndex(msg[1], msg[2]);});
-    this.addCommand("remove_pedal_at_index", "i", {|msg| this.removePedalAtIndex(msg[1]);});
+    this.addCommand("remove_pedal_at_index", "ii", {|msg| this.removePedalAtIndex(msg[1], msg[2] == 1);});
     this.addCommand("swap_pedal_at_index", "is", {|msg| this.swapPedalAtIndex(msg[1], msg[2]);});
     this.addCommand("set_num_input_channels", "i", {|msg| this.setNumInputChannels(msg[1]);});
     this.addCommand("set_input_amp", "f", {|msg| this.setInputAmp(msg[1]);});
@@ -150,12 +150,17 @@ Engine_Pedalboard : CroneEngine {
     }, {
       target = pedalDetails[boardIds[index - 1]][\synth];
     });
-    pedalDetails[pedalId][\synth] = Synth.new(
-      pedalId,
-      pedalDetails[pedalId][\arguments].merge((inL: inL, inR: inR, out: out)).getPairs,
-      target,
-      addAction
-    );
+    if (pedalDetails[pedalId][\synth].notNil, {
+      pedalDetails[pedalId][\synth].moveAfter(target);
+      pedalDetails[pedalId][\synth].set(\inL, inL, \inR, inR, \out, out);
+    }, {
+      pedalDetails[pedalId][\synth] = Synth.new(
+        pedalId,
+        pedalDetails[pedalId][\arguments].merge((inL: inL, inR: inR, out: out)).getPairs,
+        target,
+        addAction
+      );
+    });
     if (index == boardIds.size, {
         // If we're inserting at the end, we set the outputStage to have its inputs as our outputs
       outputStage.set(\inL, out, \inR, out + 1);
@@ -170,7 +175,7 @@ Engine_Pedalboard : CroneEngine {
     boardIds.insert(index, pedalId);
   }
 
-  removePedalAtIndex {|index|
+  removePedalAtIndex {|index, shouldNotFree = false|
     if (boardIds.size == 1, {
       this.buildNoPedalState;
     }, {
@@ -186,8 +191,10 @@ Engine_Pedalboard : CroneEngine {
       buses[index + 1].free;
       buses.removeAt(index + 1);
     });
-    pedalDetails[boardIds[index]][\synth].free;
-    pedalDetails[boardIds[index]][\synth] = nil;
+    if (shouldNotFree, {}, {
+      pedalDetails[boardIds[index]][\synth].free;
+      pedalDetails[boardIds[index]][\synth] = nil;
+    });
     boardIds.removeAt(index);
   }
 
