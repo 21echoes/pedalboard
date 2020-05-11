@@ -237,7 +237,7 @@ function Board:key(n, z)
     local param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
 
     -- If the pedal is not ready, show a message explaining how to set up the pedal
-    if add_or_switch and not self:_pending_pedal_class().engine_ready then
+    if add_or_switch and (self:_pending_pedal_class() and not self:_pending_pedal_class().engine_ready) then
       self._alert = Alert.new(self:_pending_pedal_class().requirements_failed_msg)
       return true
     end
@@ -630,7 +630,7 @@ function Board:_set_pedal_by_index(slot, name_index)
   if pedal_class_index == 0 then
     -- This option means we are removing the pedal in this slot
     local engine_index = slot - 1 -- The engine is zero-indexed
-    engine.remove_pedal_at_index(engine_index)
+    engine.remove_pedal_at_index(engine_index, 0)
     table.remove(self.pedals, slot)
     self:_sync_pedals_to_params()
     self:_setup_tabs()
