@@ -23,7 +23,7 @@
 --  pedals, follow instructions
 --  at llllllll.co/t/31781
 --
--- v1.3.0 @21echoes
+-- v1.4.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
