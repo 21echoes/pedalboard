@@ -71,7 +71,7 @@ function CloudsPedal:new(bypass_by_default)
 end
 
 function CloudsPedal:name(short)
-  return short and "CLOUD" or "MI Clouds"
+  return short and "GRAIN" or "Granular"
 end
 
 function CloudsPedal.params()

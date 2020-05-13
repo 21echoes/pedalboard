@@ -20,11 +20,11 @@ A simple collection of chainable effects for the Norns sound computer.
 * Vibrato
 * Auto-Wah
 * Lo-Fi
+* Resonator, based on Mutable Instruments Rings (follow instructions at https://llllllll.co/t/31781)
+* Granular, based on Mutable Instruments Clouds (follow instructions at https://llllllll.co/t/31781)
 * Amp Simulator
 * Equalizer
 * Tuner
-* Mutable Instruments Clouds (follow instructions at https://llllllll.co/t/31781)
-* Mutable Instruments Rings (follow instructions at https://llllllll.co/t/31781)
 * More to come in future versions! File a GitHub issue with recommendations, or join the discussion at [Lines](https://llllllll.co/t/pedalboard-chainable-fx-for-norns/31119/27)
 
 ## UI & Controls
@@ -60,7 +60,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
 * Reset after installs or updates (this is a new Engine)
-* Optional: Follow instructions at https://llllllll.co/t/31781 to enable the Mutable Instruments pedals (Clouds & Rings)
+* Optional: Follow instructions at https://llllllll.co/t/31781 to enable Granular and Resonator
 
 ## Roadmap
 Film a brief demo video showing how it works

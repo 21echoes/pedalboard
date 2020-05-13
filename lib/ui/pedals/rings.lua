@@ -78,7 +78,7 @@ function RingsPedal:new(bypass_by_default)
 end
 
 function RingsPedal:name(short)
-  return short and "RNGS" or "MI Rings"
+  return short and "REZ" or "Resonator"
 end
 
 function RingsPedal.params()
