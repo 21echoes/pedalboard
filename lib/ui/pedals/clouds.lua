@@ -37,28 +37,28 @@ function CloudsPedal:new(bypass_by_default)
     {
       {"Pitch/Pos", "Size/Density"},
       {"Texture/Stereo", "Fdbk/Freeze"},
-      {"Fidelity & Mode"},
+      {"Verb & Quality", "Mode"},
       i:_default_section(),
     },
     -- Pitch Shift
     {
       {"Pitch/Pos", "Size/Diffuse"},
       {"Tone/Stereo", "Fdbk/Freeze"},
-      {"Fidelity & Mode"},
+      {"Verb & Quality", "Mode"},
       i:_default_section(),
     },
     -- Looper
     {
       {"Pitch/Pos", "Size/Diffuse"},
       {"Tone/Stereo", "Fdbk/Freeze"},
-      {"Fidelity & Mode"},
+      {"Verb & Quality", "Mode"},
       i:_default_section(),
     },
     -- Spectral
     {
       {"Pitch/Buf", "Warp/Smear"},
       {"Noise/Stereo", "Fdbk/Capture"},
-      {"Fidelity & Mode"},
+      {"Verb & Quality", "Mode"},
       i:_default_section(),
     },
   }
@@ -125,6 +125,12 @@ function CloudsPedal.params()
     type = "option",
     options = {"Off", "Frozen"},
   }
+  local rvb_control = {
+    id = id_prefix .. "_rvb",
+    name = "Reverb",
+    type = "control",
+    controlspec = Controlspecs.mix(0),
+  }
   local lofi_control = {
     id = id_prefix .. "_lofi",
     name = "Fidelity",
@@ -141,7 +147,7 @@ function CloudsPedal.params()
   return {
     {{pitch_control, pos_control}, {size_control, dens_control}},
     {{tex_control, spread_control}, {fb_control, freeze_control}},
-    {{lofi_control, mode_control}},
+    {{rvb_control, lofi_control}, {mode_control}},
     Pedal._default_params(id_prefix),
   }
 end
