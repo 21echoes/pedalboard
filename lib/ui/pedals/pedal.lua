@@ -5,16 +5,13 @@ local UI = require "ui"
 local Controlspecs = include("lib/ui/util/controlspecs")
 local ScreenState = include("lib/ui/util/screen_state")
 local Label = include("lib/ui/util/label")
+local MiUgensInstaller = include("lib/ui/util/mi_ugens_installer")
 
 local Pedal = {}
 Pedal.id = "pedal"
 Pedal.required_files = {}
-Pedal.engine_ready = true
-Pedal.requirements_failed_msg = {
-  "For instructions on how",
-  "to enable this pedal, check",
-  "https://llllllll.co/t/31781"
-}
+Pedal.engine_state = "ready"
+Pedal.installer = MiUgensInstaller
 
 function Pedal:new(bypass_by_default)
   i = {}
@@ -127,6 +124,28 @@ function Pedal:enter()
   -- Called when the page is scrolled to
 end
 
+function Pedal:is_engine_ready()
+  return self.engine_state == "ready"
+end
+
+function Pedal:update_engine_state()
+  if self.engine_state ~= "pending" then
+    return
+  end
+  self.engine_state_poll = poll.set(self.id .. "_ready_poll")
+  self.engine_state_poll.callback = function(engine_state)
+    if engine_state == 2 then
+      self.engine_state = "pending"
+    else
+      self.engine_state = engine_state == 1 and "ready" or "needs_restart"
+      self.engine_state_poll:stop()
+      self.engine_state_poll = nil
+    end
+  end
+	self.engine_state_poll.time = 0.25
+	self.engine_state_poll:start()
+end
+
 function Pedal:key(n, z)
   -- Key-up currently has no meaning
   if z ~= 1 then
@@ -231,7 +250,11 @@ end
 -- Inner implementation
 
 function Pedal:cleanup()
-  -- TODO: Any cleanup needed?
+  if self.engine_state_poll ~= nil then
+    self.engine_state_poll:stop()
+    self.engine_state_poll = nil
+  end
+  -- TODO: Any additional cleanup needed?
 end
 
 function Pedal:_add_param_actions()

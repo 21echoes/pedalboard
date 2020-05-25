@@ -74,6 +74,7 @@ function Board:new(
   i._add_bypassed = false
   i._alert = nil
   i._cpu_alert_pedal = nil
+  i._pedal_install_flow = nil
   i:_setup_tabs()
   i:_add_param_actions()
 
@@ -154,6 +155,26 @@ function Board:enter()
 end
 
 function Board:key(n, z)
+  -- While showing a pedal install flow, K2 cancels, K3 is delegated to the install flow
+  if self._pedal_install_flow ~= nil then
+    if z ~= 1 then return false end
+    if n == 2 then
+      if self._pedal_install_flow:can_cancel() then
+        self._pedal_install_flow = nil
+        return true
+      end
+      return false
+    elseif n == 3 then
+      if self._pedal_install_flow.state == self._pedal_install_flow.InstallerStates.ALL_READY then
+        self._pedal_install_flow = nil
+      else
+        return self._pedal_install_flow:key(n, z)
+      end
+    else
+      return false
+    end
+  end
+
   -- While showing the CPU alert, K2 cancels, K3 confirms
   if self._alert ~= nil then
     if z ~= 1 then return false end
@@ -237,8 +258,8 @@ function Board:key(n, z)
     local param_value = self:_pending_pedal_class() and self:_param_value_for_pedal_name(self:_pending_pedal_class():name()) or 1
 
     -- If the pedal is not ready, show a message explaining how to set up the pedal
-    if add_or_switch and (self:_pending_pedal_class() and not self:_pending_pedal_class().engine_ready) then
-      self._alert = Alert.new(self:_pending_pedal_class().requirements_failed_msg)
+    if add_or_switch and (self:_pending_pedal_class() and not self:_pending_pedal_class():is_engine_ready()) then
+      self._pedal_install_flow = self:_pending_pedal_class().installer:new(self:_pending_pedal_class())
       return true
     end
 
@@ -282,8 +303,9 @@ function Board:key(n, z)
 end
 
 function Board:enc(n, delta)
-  -- Encoders do nothing while showing an alert
+  -- Encoders do nothing while showing an alert or install flow
   if self._alert ~= nil then return false end
+  if self._pedal_install_flow ~= nil then return false end
   if n == 2 then
     -- Alt+E2 re-orders pedals
     if self:_is_alt_mode() then
@@ -361,6 +383,14 @@ function Board:redraw()
   if self._sync_to_params_on_next_redraw then
     self:_sync_pedals_to_params(true)
   end
+  if self._alert ~= nil then
+    self._alert:redraw()
+    return
+  end
+  if self._pedal_install_flow ~= nil then
+    self._pedal_install_flow:redraw()
+    return
+  end
   self.tabs:redraw()
   for i, title in ipairs(self.tabs.titles) do
     render_index = i
@@ -382,9 +412,6 @@ function Board:redraw()
     end
     self:_render_tab_content(render_index)
   end
-  if self._alert ~= nil then
-    self._alert:redraw()
-  end
 end
 
 function Board:cleanup()
@@ -393,6 +420,9 @@ function Board:cleanup()
   self._remove_page = nil
   self._swap_page = nil
   self._set_page_index = nil
+  if self._pedal_install_flow ~= nil then
+    self._pedal_install_flow:cleanup()
+  end
 end
 
 function Board:_setup_tabs()
@@ -442,7 +472,7 @@ function Board:_render_tab_content(i)
         screen.text_center(self:_name_of_pending_pedal())
       else
         -- Render "Add {name of the new pedal}" as centered text
-        screen.level(self:_pending_pedal_class().engine_ready and 15 or 8)
+        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 8)
         screen.move(center_x, center_y - 4)
         screen.text_center(self:_use_short_names() and "+" or "Add")
         screen.move(center_x, center_y + 4)
@@ -470,7 +500,7 @@ function Board:_render_tab_content(i)
         screen.text_center(use_short_names and "X" or "Remove")
       else
         -- Render "Switch to {name of the new pedal}" as centered text
-        screen.level(self:_pending_pedal_class().engine_ready and 15 or 8)
+        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 8)
         screen.move(center_x, center_y - 4)
         screen.text_center(use_short_names and "->" or "Switch to")
         screen.move(center_x, center_y + 4)

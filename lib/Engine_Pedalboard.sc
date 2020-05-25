@@ -3,6 +3,7 @@ Engine_Pedalboard : CroneEngine {
   var allPedalIds;
   var boardIds;
   var optionalPedalLookup;
+  var pedalSetupState;
   var pedalDetails;
   var buses;
   var passThru;
@@ -45,12 +46,15 @@ Engine_Pedalboard : CroneEngine {
     ];
     allPedalIds = List.new;
     optionalPedalLookup = Dictionary.new;
+    pedalSetupState = Dictionary.new;
     pedalDetails = Dictionary.new;
     allPedalDefinitions.do({|pedalDefinition|
       if (pedalDefinition.addOnBoot, {
         pedalDefinition.addDef(context);
+        pedalSetupState[pedalDefinition.id] = 1;
       }, {
         optionalPedalLookup[pedalDefinition.id] = pedalDefinition;
+        pedalSetupState[pedalDefinition.id] = 2;
       });
       allPedalIds.add(pedalDefinition.id);
       pedalDetails[pedalDefinition.id] = Dictionary.new;
@@ -62,6 +66,9 @@ Engine_Pedalboard : CroneEngine {
             pedalDetails[pedalDefinition.id][\synth].set(argument, msg[1]);
           });
         });
+      });
+      this.addPoll(pedalDefinition.id ++ "_ready_poll", {
+        pedalSetupState[pedalDefinition.id];
       });
     });
 
@@ -119,7 +126,12 @@ Engine_Pedalboard : CroneEngine {
   }
 
   addPedalDefinition {|pedalId|
-    optionalPedalLookup[pedalId].addDef(context);
+    try {
+      optionalPedalLookup[pedalId].addDef(context);
+      pedalSetupState[pedalId] = 1;
+    } {
+      pedalSetupState[pedalId] = 0;
+    }
   }
 
   addPedal {|pedalId|

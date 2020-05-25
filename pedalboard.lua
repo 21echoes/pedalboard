@@ -191,3 +191,7 @@ function _set_encoder_sensitivities()
   norns.enc.sens(2, pages.index == 1 and 5 or 2)
   norns.enc.sens(3, pages.index == 1 and 6 or 2)
 end
+
+-- TODO: how do we manage upgrading MiUgens versions?
+-- probably: a mi-ugens-version.txt file
+-- but... what do we do when that's missing? or when it's *newer* than what we expect?
