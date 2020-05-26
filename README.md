@@ -20,8 +20,8 @@ A simple collection of chainable effects for the Norns sound computer.
 * Vibrato
 * Auto-Wah
 * Lo-Fi
-* Resonator, based on Mutable Instruments Rings (follow instructions at https://llllllll.co/t/31781)
-* Granular, based on Mutable Instruments Clouds (follow instructions at https://llllllll.co/t/31781)
+* Resonator, based on Mutable Instruments Rings
+* Granular, based on Mutable Instruments Clouds
 * Amp Simulator
 * Equalizer
 * Tuner
@@ -60,7 +60,6 @@ A simple collection of chainable effects for the Norns sound computer.
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
 * Reset after installs or updates (this is a new Engine)
-* Optional: Follow instructions at https://llllllll.co/t/31781 to enable Granular and Resonator
 
 ## Roadmap
 Film a brief demo video showing how it works

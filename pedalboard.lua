@@ -19,11 +19,6 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
--- To enable Granular and
---  Resonator, follow
---  instructions at
---  llllllll.co/t/31781
---
 -- v1.4.2 @21echoes
 
 engine.name = "Pedalboard"
