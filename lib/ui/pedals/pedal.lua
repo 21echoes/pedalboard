@@ -233,7 +233,7 @@ function Pedal:render_as_tab(offset, width, is_active)
   else
     self.tab_bypass_label.level = is_active and 3 or 1
   end
-  self.tab_bypass_label.center_x = center_x
+  self.tab_bypass_label.x = center_x
   self.tab_bypass_label:redraw()
 end
 
@@ -289,7 +289,7 @@ function Pedal:_initialize_widgets()
           )
         elseif param.type == "option" then
           widgets[section_index][tab_index][param_index] = Label.new({
-            center_x = x,
+            x = x,
             y = y,
             text = param.default or param.options[1],
           })

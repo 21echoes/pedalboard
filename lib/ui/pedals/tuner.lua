@@ -36,9 +36,9 @@ function TunerPedal:new(bypass_by_default)
   i._detected_freq = nil
   i._detected_note = nil
   i._detection_is_active = false
-  i._detected_note_label = Label.new({center_x = 64, y = 24, font_size = 16})
-  i._test_note_label = Label.new({center_x = 32, y = 56})
-  i._a3_freq_label = Label.new({center_x = 96, y = 56})
+  i._detected_note_label = Label.new({x = 64, y = 24, font_size = 16})
+  i._test_note_label = Label.new({x = 32, y = 56})
+  i._a3_freq_label = Label.new({x = 96, y = 56})
   i._detected_note_tab_label = Label.new({y = 24, font_size = 16})
   i._test_note_tab_label = Label.new({y = 56})
 
@@ -117,8 +117,8 @@ function TunerPedal:redraw()
 end
 
 function TunerPedal:render_as_tab(offset, width, is_active)
-  self._detected_note_tab_label.center_x = offset + width / 2
-  self._test_note_tab_label.center_x = offset + width / 2
+  self._detected_note_tab_label.x = offset + width / 2
+  self._test_note_tab_label.x = offset + width / 2
 
   if self._detected_note then
     self._detected_note_tab_label.text = MusicUtil.note_num_to_name(self._detected_note)

@@ -2,6 +2,7 @@
 local OptionalPedals = include("lib/ui/util/optional_pedals")
 local ScreenState = include("lib/ui/util/screen_state")
 local Alert = include("lib/ui/util/alert")
+local Label = include("lib/ui/util/label")
 
 local MiUgensInstaller = {}
 MiUgensInstaller.__index = MiUgensInstaller
@@ -24,6 +25,7 @@ function MiUgensInstaller:new(pedal_class)
   i.version = "mi-UGens-linux-v.03"
   i.state = nil
   i.alert = nil
+  i.label = Label.new({x=4, y = 60, text="K2 to cancel", align=Label.ALIGN_LEFT})
   i.message = nil
   i.pedal_class = pedal_class
   i:_update_state()
@@ -70,6 +72,9 @@ end
 
 function MiUgensInstaller:redraw()
   Alert.new(self.message):redraw()
+  if self:can_cancel() then
+    self.label:redraw()
+  end
 end
 
 function MiUgensInstaller:cleanup()
@@ -130,7 +135,7 @@ end
 function MiUgensInstaller:_set_state(state)
   self.state = state
   if state == InstallerStates.NO_FILES then
-    self.message = {"This pedal requires", "additional setup.", "While on WiFi,", "press K3 to install"}
+    self.message = {"This pedal requires", "additional setup.", "While on WiFi,", "press K3 to install", ""}
   elseif state == InstallerStates.NEEDS_RESTART then
     self.message = {"Press K3 to shut down,", "then you can boot", "to complete install"}
   elseif state == InstallerStates.ALL_READY then
