@@ -278,14 +278,15 @@ function Pedal:_initialize_widgets()
       for param_index, param in ipairs(tab) do
         local x, y = self:_position_for_widget(section_index, tab_index, param_index, param.type)
         if param.type == "control" then
+          local is_dbs = (Controlspecs.is_gain(param.controlspec) or Controlspecs.is_boostcut(param.controlspec))
           widgets[section_index][tab_index][param_index] = UI.Dial.new(
             x, y, 22,
             param.controlspec.default,
             param.controlspec.minval,
             param.controlspec.maxval,
-            param.controlspec.step,
-            (not Controlspecs.is_gain(param.controlspec)) and param.controlspec.minval or 0,
-            Controlspecs.is_gain(param.controlspec) and {0} or {}
+            Controlspecs.is_mix(param.controlspec) and 1 or param.controlspec.step,
+            (not is_dbs) and param.controlspec.minval or 0,
+            is_dbs and {0} or {}
           )
         elseif param.type == "option" then
           widgets[section_index][tab_index][param_index] = Label.new({
