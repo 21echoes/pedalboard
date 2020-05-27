@@ -472,7 +472,7 @@ function Board:_render_tab_content(i)
         screen.text_center(self:_name_of_pending_pedal())
       else
         -- Render "Add {name of the new pedal}" as centered text
-        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 8)
+        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 6)
         screen.move(center_x, center_y - 4)
         screen.text_center(self:_use_short_names() and "+" or "Add")
         screen.move(center_x, center_y + 4)
@@ -500,7 +500,7 @@ function Board:_render_tab_content(i)
         screen.text_center(use_short_names and "X" or "Remove")
       else
         -- Render "Switch to {name of the new pedal}" as centered text
-        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 8)
+        screen.level(self:_pending_pedal_class():is_engine_ready() and 15 or 6)
         screen.move(center_x, center_y - 4)
         screen.text_center(use_short_names and "->" or "Switch to")
         screen.move(center_x, center_y + 4)
