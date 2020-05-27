@@ -13,6 +13,7 @@ local InstallerStates = {
   INSTALLING = 'INSTALLING',
   WAITING_ON_ENGINE = 'Loading...',
   NEEDS_RESTART = 'NEEDS RESTART',
+  SHUTTING_DOWN = 'Shutting down...',
   ALL_READY = 'Ready!',
 }
 MiUgensInstaller.InstallerStates = InstallerStates
@@ -58,7 +59,9 @@ function MiUgensInstaller:key(n, z)
     self:_download_and_install()
     return true
   elseif self.state == InstallerStates.NEEDS_RESTART then
+    self:_set_state(InstallerStates.SHUTTING_DOWN)
     -- Adapted from the https://github.com/monome/norns/blob/master/lua/core/menu/sleep.lua
+    norns.script.redraw()
     norns.state.clean_shutdown = true
     norns.state.save()
     pcall(cleanup)
@@ -89,6 +92,7 @@ function MiUgensInstaller:can_cancel()
     self.state ~= InstallerStates.DOWNLOADING
     and self.state ~= InstallerStates.INSTALLING
     and self.state ~= InstallerStates.WAITING_ON_ENGINE
+    and self.state ~= InstallerStates.SHUTTING_DOWN
   )
 end
 
