@@ -3,6 +3,7 @@
 
 local ControlSpec = require "controlspec"
 local UI = require "ui"
+local MusicUtil = require "musicutil"
 local Pedal = include("lib/ui/pedals/pedal")
 local Controlspecs = include("lib/ui/util/controlspecs")
 local JustIntonation = include("lib/ui/util/just_intonation")
@@ -30,12 +31,6 @@ function RingModulator:new(bypass_by_default)
   i._param_id_to_widget[i.id .. "_interval"].start_value = 0
   i._param_id_to_widget[i.id .. "_tone"]:set_marker_position(1, 75)
 
-  -- Map the exponential control to a more linear-looking dial
-  local freq_dial = i._param_id_to_widget[i.id .. "_freq"]
-  freq_dial.min_value = 0
-  freq_dial.max_value = 100
-  freq_dial.start_value = 0
-
   return i
 end
 
@@ -52,11 +47,13 @@ function RingModulator.params()
     type = "control",
     controlspec = ControlSpec.new(-24, 24, "lin", 1, 0, "st"),
   }
-  local freq_control = {
-    id = id_prefix .. "_freq",
-    name = "Frequency",
+  local pitch_control = {
+    id = id_prefix .. "_pitch",
+    name = "Pitch",
     type = "control",
-    controlspec = ControlSpec.new(20, 20000, 'exp', 1, 440, "Hz")
+    formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+    -- TODO: ideally this would be 0-127, but controlspecs larger than ~100 steps can skip values
+    controlspec = ControlSpec.new(24, 103, "lin", 1, 60, ""), -- c3 by default
   }
   local follow_control = {
     id = id_prefix .. "_follow",
@@ -79,13 +76,13 @@ function RingModulator.params()
   }
 
   return {
-    {{interval_control, freq_control, follow_control}, {shape_control, tone_control}},
+    {{interval_control, pitch_control, follow_control}, {shape_control, tone_control}},
     Pedal._default_params(id_prefix),
   }
 end
 
 function RingModulator:_position_for_widget(section_index, tab_index, widget_index, widget_type)
-  -- Treat freq as if it was at widget_index 1 and follow as if it was at widget index 2
+  -- Treat pitch as if it was at widget_index 1 and follow as if it was at widget index 2
   if section_index == 1 and tab_index == 1 and widget_index > 1 then
     widget_index = widget_index - 1
   end
@@ -93,11 +90,11 @@ function RingModulator:_position_for_widget(section_index, tab_index, widget_ind
 end
 
 function RingModulator:enc(n, delta)
-  -- Select which of interval or freq to message, and route to follow correctly
+  -- Select which of interval or pitch to message, and route to follow correctly
   if self.section_index == 1 and self.tabs.index == 1 then
-    local showing_freq = params:get(self.id .. "_follow") == 1
+    local showing_pitch = params:get(self.id .. "_follow") == 1
     local widget_index = n - 1
-    if showing_freq or widget_index ~= 1 then
+    if showing_pitch or widget_index ~= 1 then
       widget_index = widget_index + 1
     end
     param_id = self._param_ids[self.section_index][self.tabs.index][widget_index]
@@ -109,12 +106,12 @@ end
 
 function RingModulator:redraw()
   -- subtly adapted from Pedal:redraw so that we skip drawing the hidden widget
-  local showing_freq = params:get(self.id .. "_follow") == 1
+  local showing_pitch = params:get(self.id .. "_follow") == 1
   for tab_index, tab in ipairs(self._widgets[self.section_index]) do
     for widget_index, widget in ipairs(tab) do
       local skip_redraw = false
       if self.section_index == 1 and tab_index == 1 then
-        skip_redraw = (widget_index == 1 and showing_freq) or (widget_index == 2 and not showing_freq)
+        skip_redraw = (widget_index == 1 and showing_pitch) or (widget_index == 2 and not showing_pitch)
       end
       if not skip_redraw then
         widget:redraw()
@@ -147,12 +144,10 @@ end
 function RingModulator:_set_value_from_param_value(param_id, value)
   if param_id == self.id .. "_follow" then
     self:_update_section()
-  elseif param_id == self.id .. "_freq" then
-    -- Map the exponential control to a more linear-looking dial
-    local dial_value = util.explin(20, 20000, 0, 100, value)
-    local freq_dial = self._param_id_to_widget[param_id]
-    freq_dial:set_value(dial_value)
-    freq_dial.title = value
+  elseif param_id == self.id .. "_pitch" then
+    local pitch_widget = self._param_id_to_widget[param_id]
+    pitch_widget:set_value(value)
+    pitch_widget.title = MusicUtil.note_num_to_name(value, true)
     ScreenState.mark_screen_dirty(true)
     self:_message_engine_for_param_change(param_id, value)
     return
@@ -165,6 +160,10 @@ function RingModulator:_message_engine_for_param_change(param_id, value)
     local freq_mul = JustIntonation.calculate_freq_mul(value)
     engine.ringmod_freq_mul(freq_mul)
     return
+  elseif param_id == self.id .. "_pitch" then
+    local freq = MusicUtil.note_num_to_freq(value)
+    engine.ringmod_freq(freq)
+    return
   end
   Pedal._message_engine_for_param_change(self, param_id, value)
 end
@@ -172,9 +171,9 @@ end
 function RingModulator:_update_section()
   -- Change tab text depending on Follow value
   if self.section_index == 1 then
-    local showing_freq = params:get(RingModulator.id .. "_follow") == 1
-    if showing_freq then
-      self.tabs = UI.Tabs.new(1, {"Freq & Follow", "Shape & Tone"})
+    local showing_pitch = params:get(RingModulator.id .. "_follow") == 1
+    if showing_pitch then
+      self.tabs = UI.Tabs.new(1, {"Pitch & Follow", "Shape & Tone"})
       return
     end
   end
