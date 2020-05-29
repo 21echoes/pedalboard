@@ -19,7 +19,7 @@ ReverbPedal : Pedal {
     ]);
     wet = Select.ar(tone > 0.75, [
       MoogFF.ar(wet, freq: freq, gain: 0.1),
-      RHPF.ar(wet, freq: freq, rq: 10),
+      HPF.ar(wet, freq: freq),
     ]).softclip;
 
     feedback = LocalIn.ar(2);

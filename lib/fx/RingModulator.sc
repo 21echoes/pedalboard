@@ -52,7 +52,7 @@ RingModulatorPedal : Pedal {
     ]);
     wet = Select.ar(tone > 0.75, [
       MoogFF.ar(wet, freq: filterFreq, gain: 0.1),
-      RHPF.ar(wet, freq: filterFreq, rq: 10),
+      HPF.ar(wet, freq: filterFreq),
     ]).softclip;
   }}
 }
