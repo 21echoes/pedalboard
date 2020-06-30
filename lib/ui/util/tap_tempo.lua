@@ -62,17 +62,8 @@ function TapTempo:record_tap()
     table.remove(self._tap_times, 1)
   end
   if #self._tap_times >= SAMPLE_SIZE_MIN then
-    local separations = {}
-    for i, click_time in ipairs(self._tap_times) do
-      if i > 1 then
-        table.insert(separations, click_time - self._tap_times[i - 1])
-      end
-    end
-    local total_separations = 0
-    for i, separation in ipairs(separations) do
-      total_separations = total_separations + separation
-    end
-    local average_separation = total_separations / #separations
+    local separation_total = self._tap_times[#self._tap_times] - self._tap_times[1]
+    local average_separation = separation_total / (#self._tap_times - 1)
     return 60 / average_separation
   end
   return nil
