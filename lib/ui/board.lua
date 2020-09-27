@@ -45,7 +45,9 @@ local CLICK_DURATION = 0.7
 local CPU_BASELINE = 8
 local CPU_ALERT_THRESHOLD = 70
 
-local Board = {}
+local Board = {
+  pedal_classes = pedal_classes
+}
 
 function Board:new(
   add_page,

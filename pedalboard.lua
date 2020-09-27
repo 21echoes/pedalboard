@@ -19,12 +19,13 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
--- v1.5.1 @21echoes
+-- v2.0.0-rc1 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
 local encoders = require "encoders"
 local Board = include("lib/ui/board")
+local ModMatrix = include("lib/ui/modmatrix")
 local ScreenState = include("lib/ui/util/screen_state")
 
 -- Pages UI management
@@ -49,9 +50,10 @@ function init()
   -- Some pedals have requirements that may not be satisfied. Check for them now
   Board:add_optional_pedals_if_ready()
 
-  -- Set up params (delegate to the Board class)
+  -- Start setting up params (delegate to the Board class)
   params:add_separator("Pedalboard")
   Board:add_params()
+  ModMatrix:add_params(Board.pedal_classes)
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.
@@ -63,13 +65,16 @@ function init()
   params:set('compressor', 1) -- 1 is OFF
 
   -- Set up pages
-  pages_table = {Board:new(
-    add_page,
-    insert_page_at_index,
-    remove_page,
-    swap_page,
-    set_page_index
-  )}
+  pages_table = {
+    Board:new(
+      add_page,
+      insert_page_at_index,
+      remove_page,
+      swap_page,
+      set_page_index
+    ),
+    ModMatrix:new(),
+  }
   pages = UI.Pages.new(1, #pages_table)
 
   -- Set the encoder sensitivities
@@ -153,13 +158,17 @@ function set_page_index(new_page_index)
 end
 
 function add_page(page_instance)
-  table.insert(pages_table, page_instance)
+  -- ModMatrix is always the last page, so we insert one before last
+  local index = #pages_table
+  table.insert(pages_table, index, page_instance)
+  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
 
 function insert_page_at_index(index, page_instance)
   table.insert(pages_table, index, page_instance)
+  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
@@ -170,12 +179,14 @@ function remove_page(index, cleanup)
   if cleanup then
     page:cleanup()
   end
+  pages_table[#pages_table]:remove_pedal(index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
 
 function swap_page(index, page_instance)
   pages_table[index] = page_instance
+  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
   ScreenState.mark_screen_dirty(true)
 end
 

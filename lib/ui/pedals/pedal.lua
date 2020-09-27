@@ -5,6 +5,7 @@ local UI = require "ui"
 local Controlspecs = include("lib/ui/util/controlspecs")
 local ScreenState = include("lib/ui/util/screen_state")
 local Label = include("lib/ui/util/label")
+local ModMatrixUtil = include("lib/ui/util/modmatrix")
 local MiUgensInstaller = include("lib/ui/util/mi_ugens_installer")
 
 local Pedal = {}
@@ -23,6 +24,7 @@ function Pedal:new(bypass_by_default)
   i.tab_bypass_label = Label.new({y = 56})
   i.bypass_by_default = bypass_by_default
   i.tab_mix_dial = UI.Dial.new(0, 12, 22, 50, 0, 100, 1)
+  i.modmatrix = ModMatrixUtil:new()
 
   -- SUBCLASS: must call this to complete setup
   -- i:_complete_initialization()
@@ -111,12 +113,15 @@ function Pedal:add_params()
     end
   end
   self._param_ids = param_ids
+  local param_ids_flat = {}
   local params_by_id = {}
   params:add_group(self:name(), #params_to_add)
   for i, param in ipairs(params_to_add) do
+    table.insert(param_ids_flat, param.id)
     params_by_id[param.id] = param
     params:add(param)
   end
+  self._param_ids_flat = param_ids_flat
   self._params_by_id = params_by_id
 end
 
@@ -384,12 +389,12 @@ end
 
 function Pedal:_message_engine_for_param_change(param_id, value)
   param = self._params_by_id[param_id]
-  local coerced_value = value
+  local coerced_value = self.modmatrix:mod(param, value)
   if param.controlspec ~= nil then
     if Controlspecs.is_mix(param.controlspec) then
-      coerced_value = value / 100.0
+      coerced_value = coerced_value / 100.0
     elseif Controlspecs.is_gain(param.controlspec) then
-      coerced_value = util.dbamp(value)
+      coerced_value = util.dbamp(coerced_value)
     end
   end
   engine[param_id](coerced_value)
