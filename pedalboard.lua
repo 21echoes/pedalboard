@@ -19,6 +19,11 @@
 -- Hold K2 tap K3 for tap tempo
 --  (where appropriate)
 --
+-- Mod Matrix Page
+-- E2 scrolls vertically
+-- E3 changes values
+-- K2 / K3 move left / right
+--
 -- v2.0.0-rc2 @21echoes
 
 engine.name = "Pedalboard"

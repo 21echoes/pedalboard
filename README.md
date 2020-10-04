@@ -43,6 +43,15 @@ A simple collection of chainable effects for the Norns sound computer.
 * K2 + K3 toggles bypass for focused pedal
 * K2 + K3 when adding or changing a pedal puts the new pedal in bypass by default
 
+### Last Page: Mod Matrix
+![modmatrix](screenshots/modmatrix.png)
+* First few sections are high-level controls for the Envelope Follower and 3 LFOs
+* After that, there's a "mod matrix" section, where each modulator can control the active pedals' settings
+  * Left 3 columns are the 3 LFOs, then the right-most column is the Envelope Follower
+* E2 scrolls through the rows
+* E3 changes the focused value
+* K2 moves left, K3 moves right (when in the "mod matrix" section)
+
 ### Other Pages: the Pedals
 ![board](screenshots/pedal.png)
 * UI is custom per pedal, but typically shows a dial or two at a time, controlled by E2 & E3
@@ -82,3 +91,4 @@ Film a brief demo video showing how it works
 
 ### Marking a PSet as default
 * Would be nice to have some pedals in place right when you launch, if you use them that often
+* Or even: it's just right where you left it (auto-save)
