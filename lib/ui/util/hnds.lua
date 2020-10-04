@@ -55,18 +55,18 @@ function lfo.init(num_targets, add_targets)
   for i = 1, lfo.number_of_outputs do
     params:add_group("LFO "..i, 5 + num_targets)
     -- lfo on/off
-    params:add_option(i .. "lfo_enabled", i .. " lfo", {"off", "on"}, 2)
+    params:add_option(i .. "lfo_enabled", "Enabled", {"off", "on"}, 2)
     -- lfo shape
-    params:add_option(i .. "lfo_shape", i .. " lfo shape", options.lfotypes, 1)
+    params:add_option(i .. "lfo_shape", "Shape", options.lfotypes, 1)
     params:set_action(i .. "lfo_shape", function(value) lfo[i].waveform = options.lfotypes[value] end)
     -- lfo speed
-    params:add_control(i .. "lfo_freq", i .. " lfo freq", controlspec.new(0.01, 10.0, "exp", 0.01, 0.01, "Hz"))
+    params:add_control(i .. "lfo_freq", "Freq", controlspec.new(0.01, 10.0, "exp", 0.01, 0.01, "Hz"))
     params:set_action(i .. "lfo_freq", function(value) lfo[i].freq = value end)
     -- lfo depth
-    params:add_number(i .. "lfo_depth", i .. " lfo depth", 0, 100, 100)
+    params:add_number(i .. "lfo_depth", "Depth", 0, 100, 100)
     params:set_action(i .. "lfo_depth", function(value) lfo[i].depth = value end)
     -- lfo offset
-    params:add_control(i .."lfo_offset", i .. " offset", controlspec.new(-1, 1, "lin", 0.01, 0.0, ""))
+    params:add_number(i .. "lfo_offset", "Offset", -100, 100, 0)
     params:set_action(i .. "lfo_offset", function(value) lfo[i].offset = value end)
     add_targets(i)
   end
@@ -86,7 +86,7 @@ function lfo.init(num_targets, add_targets)
           value = make_sh(i)
         end
         lfo[i].prev = value
-        lfo[i].value = math.max(-1.0, math.min(1.0, value)) * (lfo[i].depth * 0.01) + lfo[i].offset
+        lfo[i].value = math.max(-1.0, math.min(1.0, value)) * (lfo[i].depth * 0.01) + (lfo[i].offset * 0.01)
         lfo[i].counter = lfo[i].counter + lfo[i].freq
       end
     end

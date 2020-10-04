@@ -74,34 +74,48 @@ function ModMatrix:key(n, z)
   elseif n == 3 then
     direction = 1
   end
-  self.x = util.clamp(self.x + direction, 1, self.modmatrix.lfos.number_of_outputs)
+  self.x = util.clamp(self.x + direction, 1, self.modmatrix.lfos.number_of_outputs + 1)
 
   return true
 end
 
 local lfo_controls = {
-  {"Enabled", "lfo"},
+  {"Enabled", "lfo_enabled"},
   {"Shape", "lfo_shape"},
   {"Freq", "lfo_freq"},
   {"Depth", "lfo_depth"},
   {"Offset", "lfo_offset"},
 }
 local num_controls_per_lfo = #lfo_controls + 1
+local envfol_controls = {
+  {"Enabled", "envfol_enabled"},
+  {"Gain", "envfol_depth"},
+  {"Offset", "envfol_offset"},
+  {"Smoothing", "envfol_smoothing"}
+}
+local num_envfol_controls = #envfol_controls + 1
 local max_x = 125
 
 function ModMatrix:enc(n, delta)
   local num_lfo_controls = num_controls_per_lfo * self.modmatrix.lfos.number_of_outputs
+  local num_meta_controls = num_lfo_controls + num_envfol_controls
   if n == 2 then
     local scroll_delta = util.clamp(delta, -1, 1)
-    self.y = util.clamp(self.y + scroll_delta, 1, #self.rows + num_lfo_controls)
+    self.y = util.clamp(self.y + scroll_delta, 1, #self.rows + num_meta_controls)
   elseif n == 3 then
-    if self.y > num_lfo_controls then
-      local row = self.rows[self.y - num_lfo_controls]
+    if self.y > num_meta_controls then
+      local row = self.rows[self.y - num_meta_controls]
       local is_title = row[1]
       if is_title then return false end
       local param = row[2]
       local param_id = self.modmatrix.param_id(param.id, self.x)
       params:delta(param_id, delta)
+    elseif self.y > num_lfo_controls then
+      local envfol_control_index = (self.y - num_lfo_controls - 1)
+      local is_title = envfol_control_index == 0
+      if is_title then return false end
+      local envfol_control = envfol_controls[envfol_control_index]
+      params:delta(envfol_control[2], delta)
     else
       local lfo_control_index = (self.y - 1) % num_controls_per_lfo
       local is_title = lfo_control_index == 0
@@ -118,26 +132,45 @@ function ModMatrix:redraw()
   -- Adapted from norns/lua/core/menu/params.lua
   local offset = self.y - 3
   local num_lfo_controls = num_controls_per_lfo * self.modmatrix.lfos.number_of_outputs
+  local num_meta_controls = num_lfo_controls + num_envfol_controls
   for i=1,6 do
     local index = offset + i
-    local row_index = index - num_lfo_controls
+    local row_index = index - num_meta_controls
     if i==3 then screen.level(15) else screen.level(4) end
     if index >= 1 and row_index < 1 then
-      local lfo_control_index = (index - 1) % num_controls_per_lfo
-      local is_title = lfo_control_index == 0
-      local lfo_num = math.floor((index - 1) / num_controls_per_lfo) + 1
-      if is_title then
-        screen.move(0,10*i+2.5)
-        screen.line_rel(max_x,0)
-        screen.stroke()
-        screen.move(63,10*i)
-        screen.text_center("LFO "..lfo_num)
+      local envfol_index = row_index + num_envfol_controls - 1
+      if envfol_index < 0 then
+        local lfo_control_index = (index - 1) % num_controls_per_lfo
+        local is_title = lfo_control_index == 0
+        local lfo_num = math.floor((index - 1) / num_controls_per_lfo) + 1
+        if is_title then
+          screen.move(0,10*i+2.5)
+          screen.line_rel(max_x,0)
+          screen.stroke()
+          screen.move(63,10*i)
+          screen.text_center("LFO "..lfo_num)
+        else
+          local lfo_control = lfo_controls[lfo_control_index]
+          screen.move(0,10*i)
+          screen.text(lfo_control[1])
+          screen.move(max_x,10*i)
+          screen.text_right(params:string(lfo_num..lfo_control[2]))
+        end
       else
-        local lfo_control = lfo_controls[lfo_control_index]
-        screen.move(0,10*i)
-        screen.text(lfo_control[1])
-        screen.move(max_x,10*i)
-        screen.text_right(params:string(lfo_num..lfo_control[2]))
+        local is_title = envfol_index == 0
+        if is_title then
+          screen.move(0,10*i+2.5)
+          screen.line_rel(max_x,0)
+          screen.stroke()
+          screen.move(63,10*i)
+          screen.text_center("Envelope Follower")
+        else
+          local envfol_control = envfol_controls[envfol_index]
+          screen.move(0,10*i)
+          screen.text(envfol_control[1])
+          screen.move(max_x,10*i)
+          screen.text_right(params:string(envfol_control[2]))
+        end
       end
     elseif row_index >= 1 and row_index <= #self.rows then
       local is_title = self.rows[row_index][1]
@@ -151,9 +184,10 @@ function ModMatrix:redraw()
         local param = self.rows[row_index][2]
         screen.move(0,10*i)
         screen.text(param.name)
-        for lfo_index = 1,self.modmatrix.lfos.number_of_outputs do
+        local num_columns = self.modmatrix.lfos.number_of_outputs + 1
+        for lfo_index = 1,num_columns do
           local param_id = self.modmatrix.param_id(param.id, lfo_index)
-          screen.move(max_x - ((self.modmatrix.lfos.number_of_outputs - lfo_index) * 22),10*i)
+          screen.move(max_x - ((num_columns - lfo_index) * 22),10*i)
           if i==3 and self.x == lfo_index then screen.level(15) else screen.level(4) end
           screen.text_right(params:string(param_id))
         end
