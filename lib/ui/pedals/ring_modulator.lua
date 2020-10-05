@@ -157,11 +157,13 @@ end
 
 function RingModulator:_message_engine_for_param_change(param_id, value)
   if param_id == self.id .. "_interval" then
-    local freq_mul = JustIntonation.calculate_freq_mul(value)
+    local mod_value = self.modmatrix:mod(self._params_by_id[param_id], value)
+    local freq_mul = JustIntonation.calculate_freq_mul(mod_value)
     engine.ringmod_freq_mul(freq_mul)
     return
   elseif param_id == self.id .. "_pitch" then
-    local freq = MusicUtil.note_num_to_freq(value)
+    local mod_value = self.modmatrix:mod(self._params_by_id[param_id], value)
+    local freq = MusicUtil.note_num_to_freq(mod_value)
     engine.ringmod_freq(freq)
     return
   end

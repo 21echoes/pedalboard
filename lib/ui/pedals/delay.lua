@@ -99,8 +99,10 @@ function DelayPedal:_message_engine_for_param_change(param_id, value)
   local bpm_param_id = self.id .. "_bpm"
   local beat_division_param_id = self.id .. "_beat_division"
   if param_id == bpm_param_id or param_id == beat_division_param_id then
-    local bpm = param_id == bpm_param_id and value or params:get(bpm_param_id)
-    local beat_division_option = param_id == beat_division_param_id and value + 1 or params:get(beat_division_param_id)
+    local raw_bpm = param_id == bpm_param_id and value or params:get(bpm_param_id)
+    local bpm = self.modmatrix:mod(self._params_by_id[bpm_param_id], raw_bpm)
+    local raw_beat_division_option = param_id == beat_division_param_id and value + 1 or params:get(beat_division_param_id)
+    local beat_division_option = self.modmatrix:mod(self._params_by_id[beat_division_param_id], raw_beat_division_option)
     local dur = self._tap_tempo.tempo_and_division_to_dur(bpm, beat_division_option)
     engine.delay_time(dur)
     return

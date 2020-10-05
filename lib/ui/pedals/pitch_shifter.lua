@@ -87,12 +87,15 @@ function PitchShifterPedal:_message_engine_for_param_change(param_id, value)
   local temperament_param_id = self.id .. "_temperament"
   local fine_tune_param_id = self.id .. "_fine_tune"
   if param_id == interval_param_id or param_id == temperament_param_id or param_id == fine_tune_param_id then
-    local interval = param_id == interval_param_id and value or params:get(interval_param_id)
-    if interval == nil then interval = 0 end
-    local just_intonation = param_id == temperament_param_id and value == 0 or params:get(temperament_param_id) == 1
-    if just_intonation == nil then just_intonation = true end
-    local fine_tune = param_id == fine_tune_param_id and value or params:get(fine_tune_param_id)
-    if fine_tune == nil then fine_tune = 0 end
+    local raw_interval = param_id == interval_param_id and value or params:get(interval_param_id)
+    if raw_interval == nil then raw_interval = 0 end
+    local interval = self.modmatrix:mod(self._params_by_id[interval_param_id], raw_interval)
+    local raw_just_intonation = param_id == temperament_param_id and value == 0 or params:get(temperament_param_id) == 1
+    if raw_just_intonation == nil then raw_just_intonation = true end
+    local just_intonation = self.modmatrix:mod(self._params_by_id[temperament_param_id], raw_just_intonation)
+    local raw_fine_tune = param_id == fine_tune_param_id and value or params:get(fine_tune_param_id)
+    if raw_fine_tune == nil then raw_fine_tune = 0 end
+    local fine_tune = self.modmatrix:mod(self._params_by_id[fine_tune_param_id], raw_fine_tune)
     local freq_mul = self._calculate_freq_mul(interval, just_intonation, fine_tune)
     engine.pitchshifter_freq_mul(freq_mul)
     return

@@ -104,7 +104,8 @@ function EqualizerPedal:_message_engine_for_param_change(param_id, value)
   local hs_amp_param_id = self.id .. "_hs_amp"
   local mid_amp_param_id = self.id .. "_mid_amp"
   if param_id == ls_amp_param_id or param_id == hs_amp_param_id or param_id == mid_amp_param_id then
-    engine[param_id](util.dbamp(value))
+    local mod_value = self.modmatrix:mod(self._params_by_id[param_id], value)
+    engine[param_id](util.dbamp(mod_value))
     return
   end
   Pedal._message_engine_for_param_change(self, param_id, value)

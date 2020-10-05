@@ -1,6 +1,7 @@
 local hnds = include("lib/ui/util/hnds")
 local ScreenState = include("lib/ui/util/screen_state")
 local ControlSpec = require "controlspec"
+local tabutil = require "tabutil"
 
 if _ModMatrix ~= nil then
   return _ModMatrix
@@ -72,8 +73,16 @@ function _ModMatrix:init(pedal_classes)
   self.amp_poll_r:start()
 end
 
+local param_block_list = {
+  "delay_bpm",
+  "delay_beat_division",
+}
+
 function _ModMatrix.is_targetable(param)
-  return param ~= nil and param.controlspec ~= nil
+  if param == nil or param.controlspec == nil then
+    return false
+  end
+  return not tabutil.contains(param_block_list, param.id)
 end
 
 function _ModMatrix:_add_mod_targets(lfo_index)
