@@ -24,7 +24,7 @@
 -- E3 changes values
 -- K2 / K3 move left / right
 --
--- v2.0.0-rc2 @21echoes
+-- v2.0.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
