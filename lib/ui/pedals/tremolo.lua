@@ -100,7 +100,7 @@ function TremoloPedal:_message_engine_for_param_change(param_id, value)
     local raw_bpm = param_id == bpm_param_id and value or params:get(bpm_param_id)
     local bpm = self.modmatrix:mod(self._params_by_id[bpm_param_id], raw_bpm)
     local raw_beat_division_option = param_id == beat_division_param_id and value + 1 or params:get(beat_division_param_id)
-    local beat_division_option = self.modmatrix:mod(self._params_by_id[beat_division_param_id], raw_beat_division_option)
+    local beat_division_option = self.modmatrix:mod(self._params_by_id[beat_division_param_id], raw_beat_division_option - 1) + 1
     local dur = self._tap_tempo.tempo_and_division_to_dur(bpm, beat_division_option)
     engine.tremolo_time(dur)
     return

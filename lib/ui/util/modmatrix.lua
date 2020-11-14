@@ -79,7 +79,10 @@ local param_block_list = {
 }
 
 function _ModMatrix.is_targetable(param)
-  if param == nil or param.controlspec == nil then
+  if param == nil then
+    return false
+  end
+  if param.controlspec == nil and param.type ~= "option" then
     return false
   end
   return not tabutil.contains(param_block_list, param.id)
@@ -132,7 +135,12 @@ function hnds.process()
       for i, param_id in ipairs(pedal._param_ids_flat) do
         local param = pedal._params_by_id[param_id]
         if _ModMatrix.is_targetable(param) then
-          pedal:_message_engine_for_param_change(param.id, params:get(param.id))
+          local value = params:get(param.id)
+          -- Coerce to 0-indexed for the engine
+          if param.type == "option" then
+            value = value - 1
+          end
+          pedal:_message_engine_for_param_change(param.id, value)
         end
       end
     end
@@ -142,8 +150,17 @@ end
 function _ModMatrix:mod(param, value)
   if not self.is_targetable(param) then return value end
   if self.lfos == nil then return value end
+
   -- Transform the "real" range down to 0 -> 1
-  local raw_value = param.controlspec:unmap(value)
+  local raw_value = 0
+  if param.type == "option" then
+    -- Options are 0-indexed at this point
+    local num_options = #param.options
+    raw_value = ((value * 2) + 1) / (num_options * 2.0)
+  else
+    raw_value = param.controlspec:unmap(value)
+  end
+
   for i = 1, self.lfos.number_of_outputs do
     -- Check the LFO is enabled
     if params:get(i .. "lfo_enabled") == 2 then
@@ -162,7 +179,11 @@ function _ModMatrix:mod(param, value)
     local modmatrix_modifier = envfol_modifier * (params:get(self.param_id(param.id, self.lfos.number_of_outputs + 1)) * 0.01)
     raw_value = raw_value + modmatrix_modifier
   end
+
   -- Transform back to the real range
+  if param.type == "option" then
+    return math.floor(util.clamp(raw_value, 0, 0.99999) * #param.options)
+  end
   return param.controlspec:map(raw_value)
 end
 
