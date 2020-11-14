@@ -183,7 +183,7 @@ function ModMatrix:redraw()
       else
         local param = self.rows[row_index][2]
         screen.move(0,10*i)
-        screen.text(param.name)
+        screen.text(string.sub(param.name, 1, 10))
         local num_columns = self.modmatrix.lfos.number_of_outputs + 1
         for lfo_index = 1,num_columns do
           local param_id = self.modmatrix.param_id(param.id, lfo_index)
