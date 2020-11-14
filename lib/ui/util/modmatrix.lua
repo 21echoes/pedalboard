@@ -12,7 +12,6 @@ _ModMatrix = {}
 _ModMatrix.__index = _ModMatrix
 
 local MAX_SLOTS = 4 -- TODO: somehow get from board.lua?
-local NIL = 0
 
 function _ModMatrix:new(i)
   if _ModMatrixInstance ~= nil then
@@ -22,7 +21,6 @@ function _ModMatrix:new(i)
   i = i or {}
   setmetatable(i, _ModMatrix)
   i.__index = _ModMatrix
-  i.EMPTY = NIL
   i.lfos = hnds
   i.amp_poll_l = nil
   i.amp_l = 0
@@ -30,9 +28,6 @@ function _ModMatrix:new(i)
   i.amp_r = 0
   i.has_initialized = false
   i.pedals = {}
-  for j = 1, MAX_SLOTS do
-    table.insert(i.pedals, NIL)
-  end
   _ModMatrixInstance = i
   return i
 end
@@ -117,11 +112,11 @@ function _ModMatrix:cleanup()
 end
 
 function _ModMatrix:add_pedal(pedal, index)
-  self.pedals[index] = pedal
+  table.insert(self.pedals, index, pedal)
 end
 
 function _ModMatrix:remove_pedal(index)
-  self.pedals[index] = NIL
+  table.remove(self.pedals, index)
 end
 
 function _ModMatrix.param_id(param_id, lfo_index)
@@ -131,17 +126,15 @@ end
 function hnds.process()
   if _ModMatrixInstance == nil or _ModMatrixInstance.pedals == nil then return end
   for i, pedal in ipairs(_ModMatrixInstance.pedals) do
-    if pedal ~= NIL then
-      for i, param_id in ipairs(pedal._param_ids_flat) do
-        local param = pedal._params_by_id[param_id]
-        if _ModMatrix.is_targetable(param) then
-          local value = params:get(param.id)
-          -- Coerce to 0-indexed for the engine
-          if param.type == "option" then
-            value = value - 1
-          end
-          pedal:_message_engine_for_param_change(param.id, value)
+    for j, param_id in ipairs(pedal._param_ids_flat) do
+      local param = pedal._params_by_id[param_id]
+      if _ModMatrix.is_targetable(param) then
+        local value = params:get(param.id)
+        -- Coerce to 0-indexed for the engine
+        if param.type == "option" then
+          value = value - 1
         end
+        pedal:_message_engine_for_param_change(param.id, value)
       end
     end
   end

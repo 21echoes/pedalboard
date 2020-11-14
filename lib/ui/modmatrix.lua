@@ -47,17 +47,16 @@ function ModMatrix:_calculate_rows()
   local rows = {}
   for i = 1,#self.modmatrix.pedals do
     local pedal = self.modmatrix.pedals[i]
-    if pedal ~= self.modmatrix.EMPTY then
-      table.insert(rows, { true, pedal:name() })
-      for i, param_id in ipairs(pedal._param_ids_flat) do
-        local param = pedal._params_by_id[param_id]
-        if self.modmatrix.is_targetable(param) then
-          table.insert(rows, { false, param })
-        end
+    table.insert(rows, { true, pedal:name() })
+    for j, param_id in ipairs(pedal._param_ids_flat) do
+      local param = pedal._params_by_id[param_id]
+      if self.modmatrix.is_targetable(param) then
+        table.insert(rows, { false, param })
       end
     end
   end
   self.rows = rows
+  self.y = util.clamp(self.y, 1, self:_total_num_rows())
   ScreenState.mark_screen_dirty(true)
 end
 
@@ -96,12 +95,18 @@ local envfol_controls = {
 local num_envfol_controls = #envfol_controls + 1
 local max_x = 125
 
+function ModMatrix:_total_num_rows()
+  local num_lfo_controls = num_controls_per_lfo * self.modmatrix.lfos.number_of_outputs
+  local num_meta_controls = num_lfo_controls + num_envfol_controls
+  return #self.rows + num_meta_controls
+end
+
 function ModMatrix:enc(n, delta)
   local num_lfo_controls = num_controls_per_lfo * self.modmatrix.lfos.number_of_outputs
   local num_meta_controls = num_lfo_controls + num_envfol_controls
   if n == 2 then
     local scroll_delta = util.clamp(delta, -1, 1)
-    self.y = util.clamp(self.y + scroll_delta, 1, #self.rows + num_meta_controls)
+    self.y = util.clamp(self.y + scroll_delta, 1, self:_total_num_rows())
   elseif n == 3 then
     if self.y > num_meta_controls then
       local row = self.rows[self.y - num_meta_controls]
