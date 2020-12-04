@@ -230,7 +230,7 @@ end
 --- Add Arcify assignment params to the Norns PARAMS screen.
 function Arcify:add_params(allow_shift)
     -- TODO: check if separators count for the group count (otherwise, 12 -> 10)
-    params:add_group("Arc", allow_shift and 12 or 4)
+    -- params:add_group("Arc", allow_shift and 12 or 4)
     self.opts_ = params_as_options(self)
     for i = 1, 4 do
         build_encoder_mapping_param(self, i, false, self.opts_)
@@ -320,7 +320,9 @@ end
 -- @string param_name which param ID to map it to
 -- @bool is_shift if mapping an encoder in shift mode
 function Arcify:map_encoder_via_params(position, param_name, is_shift)
+    local param_id = param_id_for_encoder(position, is_shift)
     if param_name == "none" then
+        params:set(param_id, 1)
         return
     elseif position < 1 or position > 4 then
         print("Invalid arc encoder number: " .. position)
@@ -329,7 +331,6 @@ function Arcify:map_encoder_via_params(position, param_name, is_shift)
         print("Invalid parameter name: " .. param_name .. "at" .. position)
         return
     end
-    local param_id = param_id_for_encoder(position, is_shift)
     local option_num = tabutil.key(self.opts_, param_name)
     params:set(param_id, option_num)
 end
