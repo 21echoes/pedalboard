@@ -32,6 +32,7 @@ local encoders = require "encoders"
 local Board = include("lib/ui/board")
 local ModMatrix = include("lib/ui/modmatrix")
 local ScreenState = include("lib/ui/util/screen_state")
+local Arcify = include("lib/ui/util/arcify")
 
 -- Pages UI management
 local pages
@@ -46,6 +47,9 @@ local initital_monitor_level
 local initital_reverb_onoff
 local initital_compressor_onoff
 
+-- Arc control of parameters
+local arcify = nil
+
 function init()
   -- Setup our overall rendering style
   screen.level(15)
@@ -59,6 +63,7 @@ function init()
   params:add_separator("Pedalboard")
   Board:add_params()
   ModMatrix:add_params(Board.pedal_classes)
+  setup_arcify()
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.
@@ -208,6 +213,17 @@ function _set_encoder_sensitivities()
   -- Set the E2 and E3 sensitivities to be quite slower on the Board, otherwise just a bit slower
   norns.enc.sens(2, pages.index == 1 and 5 or 2)
   norns.enc.sens(3, pages.index == 1 and 6 or 2)
+end
+
+function setup_arcify()
+  arcify = Arcify.new()
+  for pedal_index, pedal in ipairs(Board.pedal_classes) do
+    for i, param_id in ipairs(pedal._param_ids_flat) do
+      arcify:register(param_id)
+    end
+  end
+  -- TODO: register the modmatrix params too
+  arcify:add_params()
 end
 
 -- TODO: how do we manage upgrading MiUgens versions?
