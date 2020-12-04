@@ -24,6 +24,19 @@
 -- E3 changes values
 -- K2 / K3 move left / right
 --
+-- Arc (optional)
+-- "Follow" mode:
+-- On The Board,
+-- each enc controls wet/dry.
+-- On Pedal Pages,
+-- E1,2,3 change dial values
+-- E4 changes wet/dry.
+-- "Fixed" mode:
+-- Use the params page
+-- to choose which params
+-- are controled by which enc
+--
+--
 -- v2.1.1 @21echoes
 
 engine.name = "Pedalboard"

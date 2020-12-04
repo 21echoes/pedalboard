@@ -65,6 +65,14 @@ A simple collection of chainable effects for the Norns sound computer.
   * Out gain
 * On pedals with tap-tempo (currently Delay and Tremolo), hold K2 and tap K3 for tap tempo
 
+### Arc (optional)
+* Choose "Follow" or "Fixed" in the params menu, under "Arc". Defaults to "Follow"
+* "Follow" mode
+  * On The Board, each arc encoder controls wet/dry
+  * On Pedal Pages, arc encoders 1, 2, and 3 change dial values and arc encoder 4 changes wet/dry
+* "Fixed" mode
+  * Use the params page to choose which params are controled by which arc encoder
+
 ## Requirements
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
