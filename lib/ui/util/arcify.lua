@@ -98,6 +98,7 @@ local function build_control_param(p, scale, is_rounded)
     newp.name = p.id
     newp.min = cs.minval
     newp.max = cs.maxval
+    newp.controlspec = cs
     newp.scale = scale or DEFAULT_SCALE
     newp.is_rounded = is_rounded
     newp.is_control = true
@@ -106,26 +107,23 @@ local function build_control_param(p, scale, is_rounded)
 end
 
 -- private methods
-local function draw_leds(self, num, amount, intensity)
-    for i = LO_LED, amount do
-        self.a_:led(num, i, intensity)
-    end
-end
-
+local control_start_angle = math.pi * (-25/32)
+local control_end_angle = math.pi * (26/32)
+local start_angle = 0
+local end_angle = math.pi * (63.999/32)
 local function redraw_ring(self, num, e)
     if e then
         if e.name and e.min and e.max then
-            local min = e.min
-            local max = e.max
-            local value = params:get(e.name)
-            if e.is_control then
-                min = 0
-                max = 1
-                value = params:get_raw(e.name)
-            end
-            local param_led = math.ceil(util.linlin(min, max, LO_LED, HI_LED, value))
             local intensity = e.intensity or DEFAULT_INTENSITY
-            draw_leds(self, num, param_led, intensity)
+            if e.is_control then
+                local value = e.controlspec:unmap(params:get(e.name))
+                local param_led = util.linlin(0, 1, control_start_angle, control_end_angle, value)
+                self.a_:segment(num, control_start_angle, param_led, intensity)
+            else
+                local value = params:get(e.name)
+                local param_led = util.linlin(e.min, e.max, start_angle, end_angle, value)
+                self.a_:segment(num, start_angle, param_led, intensity)
+            end
         end
     end
 end
