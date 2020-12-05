@@ -92,7 +92,7 @@ function PitchShifterPedal:_message_engine_for_param_change(param_id, value)
     local interval = self.modmatrix:mod(self._params_by_id[interval_param_id], raw_interval)
     local raw_just_intonation = param_id == temperament_param_id and value == 0 or params:get(temperament_param_id) == 1
     if raw_just_intonation == nil then raw_just_intonation = true end
-    local just_intonation = self.modmatrix:mod(self._params_by_id[temperament_param_id], raw_just_intonation)
+    local just_intonation = self.modmatrix:mod(self._params_by_id[temperament_param_id], raw_just_intonation and 1 or 0) == 1
     local raw_fine_tune = param_id == fine_tune_param_id and value or params:get(fine_tune_param_id)
     if raw_fine_tune == nil then raw_fine_tune = 0 end
     local fine_tune = self.modmatrix:mod(self._params_by_id[fine_tune_param_id], raw_fine_tune)
