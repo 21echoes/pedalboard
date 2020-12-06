@@ -155,6 +155,10 @@ function current_page()
   return pages_table[pages.index]
 end
 
+function modmatrix_page()
+  return pages_table[#pages_table]
+end
+
 function set_page_index(new_page_index)
   pages:set_index(new_page_index)
   if current_page() then current_page():enter() end
@@ -166,14 +170,14 @@ function add_page(page_instance)
   -- ModMatrix is always the last page, so we insert one before last
   local index = #pages_table
   table.insert(pages_table, index, page_instance)
-  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
+  modmatrix_page():add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
 
 function insert_page_at_index(index, page_instance)
   table.insert(pages_table, index, page_instance)
-  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
+  modmatrix_page():add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
@@ -184,14 +188,17 @@ function remove_page(index, cleanup)
   if cleanup then
     page:cleanup()
   end
-  pages_table[#pages_table]:remove_pedal(index - 1)
+  modmatrix_page():remove_pedal(index - 1)
   pages = UI.Pages.new(1, #pages_table)
   ScreenState.mark_screen_dirty(true)
 end
 
 function swap_page(index, page_instance)
+  local old_pedal = pages_table[index]
   pages_table[index] = page_instance
-  pages_table[#pages_table]:add_pedal(page_instance, index - 1)
+  modmatrix_page():remove_pedal(index - 1)
+  modmatrix_page():add_pedal(page_instance, index - 1)
+  old_pedal:cleanup()
   ScreenState.mark_screen_dirty(true)
 end
 

@@ -259,6 +259,7 @@ function Pedal:cleanup()
     self.engine_state_poll:stop()
     self.engine_state_poll = nil
   end
+  self.modmatrix = nil
   -- TODO: Any additional cleanup needed?
 end
 
