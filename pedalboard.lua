@@ -31,13 +31,16 @@
 -- On Pedal Pages,
 -- E1,2,3 change dial values
 -- E4 changes wet/dry.
+-- On Mod Matrix,
+-- E1,2,3,4 change whatever
+-- is currently focused.
 -- "Fixed" mode:
 -- Use the params page
 -- to choose which params
 -- are controled by which enc
 --
 --
--- v2.1.1 @21echoes
+-- v2.2.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"

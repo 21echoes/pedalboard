@@ -70,6 +70,9 @@ A simple collection of chainable effects for the Norns sound computer.
 * "Follow" mode
   * On The Board, each arc encoder controls wet/dry
   * On Pedal Pages, arc encoders 1, 2, and 3 change dial values and arc encoder 4 changes wet/dry
+  * On the Mod Matrix page, arc encoders change what they control depending on which row you are on
+    * In the LFOs and Envelope Follower "meta" sections, each encoder controls a different "meta" control
+    * In the detailed Mod Matrix grid, the four encoders control the four columns of the focused row
 * "Fixed" mode
   * Use the params page to choose which params are controled by which arc encoder
 
