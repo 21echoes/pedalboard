@@ -17,20 +17,37 @@ function ModMatrix:new()
   i.rows = {}
   i.x = 1
   i.y = 1
+  i._arcify = nil
 
   return i
 end
 
 function ModMatrix:add_params(pedal_classes)
-  if self.modmatrix ~= nil then
-    self.modmatrix:init(pedal_classes)
-  else
-    ModMatrixUtil:new():init(pedal_classes)
+  local mm = self.modmatrix
+  if mm == nil then
+    mm = ModMatrixUtil:new()
   end
+  mm:init(pedal_classes)
 end
 
-function ModMatrix:enter()
-  -- Called when the page is scrolled to
+-- TODO: refactor this to share code better with add_params/init
+function ModMatrix:arcify_register(arcify)
+  local mm = self.modmatrix
+  if mm == nil then
+    mm = ModMatrixUtil:new()
+  end
+  mm:arcify_register(arcify)
+end
+
+-- Called when the page is scrolled to
+function ModMatrix:enter(arcify)
+  self._arcify = arcify
+  self:_arcify_maybe_follow()
+end
+
+function ModMatrix:cleanup()
+  self.modmatrix:cleanup()
+  self._arcify = nil
 end
 
 function ModMatrix:add_pedal(pedal, index)
@@ -79,11 +96,11 @@ function ModMatrix:key(n, z)
 end
 
 local lfo_controls = {
-  {"Enabled", "lfo_enabled"},
-  {"Shape", "lfo_shape"},
-  {"Freq", "lfo_freq"},
-  {"Depth", "lfo_depth"},
-  {"Offset", "lfo_offset"},
+  {"Enabled", "_lfo_enabled"},
+  {"Shape", "_lfo_shape"},
+  {"Freq", "_lfo_freq"},
+  {"Depth", "_lfo_depth"},
+  {"Offset", "_lfo_offset"},
 }
 local num_controls_per_lfo = #lfo_controls + 1
 local envfol_controls = {
@@ -107,6 +124,7 @@ function ModMatrix:enc(n, delta)
   if n == 2 then
     local scroll_delta = util.clamp(delta, -1, 1)
     self.y = util.clamp(self.y + scroll_delta, 1, self:_total_num_rows())
+    self:_arcify_maybe_follow()
   elseif n == 3 then
     if self.y > num_meta_controls then
       local row = self.rows[self.y - num_meta_controls]
@@ -201,8 +219,35 @@ function ModMatrix:redraw()
   end
 end
 
-function ModMatrix:cleanup()
-  self.modmatrix:cleanup()
+function ModMatrix:_arcify_maybe_follow()
+  if params:get("arc_mode") ~= 1 then return end
+  local arcify = self._arcify
+  if arcify == nil then return end
+
+  local num_lfo_controls = num_controls_per_lfo * self.modmatrix.lfos.number_of_outputs
+  local num_meta_controls = num_lfo_controls + num_envfol_controls
+  if self.y > num_meta_controls then
+    local row = self.rows[self.y - num_meta_controls]
+    local is_title = row[1]
+    if is_title then return end
+    local param = row[2]
+    for i=1,4 do
+      arcify:map_encoder_via_params(i, self.modmatrix.param_id(param.id, i))
+    end
+    return
+  end
+
+  if self.y > num_lfo_controls then
+    for i=1,4 do
+      arcify:map_encoder_via_params(i, envfol_controls[i][2])
+    end
+    return
+  end
+
+  local lfo_num = math.floor((self.y - 1) / num_controls_per_lfo) + 1
+  for i=1,4 do
+    arcify:map_encoder_via_params(i, lfo_num..lfo_controls[i][2])
+  end
 end
 
 return ModMatrix

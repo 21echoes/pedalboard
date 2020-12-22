@@ -67,6 +67,7 @@ function RingsPedal:new(bypass_by_default)
   i:_complete_initialization()
   i._param_id_to_widget[i.id .. "_interval"]:set_marker_position(1, 0)
   i._param_id_to_widget[i.id .. "_interval"].start_value = 0
+  i._arcify = nil
 
   return i
 end
@@ -150,6 +151,17 @@ function RingsPedal.params()
   }
 end
 
+function RingsPedal:enter(arcify)
+  Pedal.enter(self, arcify)
+  self._arcify = arcify
+  self:_arcify_maybe_follow()
+end
+
+function RingsPedal:cleanup()
+  Pedal.cleanup(self)
+  self._arcify = nil
+end
+
 function RingsPedal:_position_for_widget(section_index, tab_index, widget_index, widget_type)
   -- Treat freq as if it was at widget_index 1 and follow as if it was at widget index 2
   if section_index == 1 and tab_index == 1 and widget_index > 1 then
@@ -158,19 +170,31 @@ function RingsPedal:_position_for_widget(section_index, tab_index, widget_index,
   return Pedal._position_for_widget(self, section_index, tab_index, widget_index, widget_type)
 end
 
-function RingsPedal:enc(n, delta)
+function RingsPedal:_param_id_lookup(section_index, tabs_index, enc_index)
   -- Select which of interval or freq to message, and route to follow correctly
-  if self.section_index == 1 and self.tabs.index == 1 then
+  if section_index == 1 and tabs_index == 1 then
     local showing_freq = params:get(self.id .. "_follow") == 1
-    local widget_index = n - 1
+    local widget_index = enc_index - 1
     if showing_freq or widget_index ~= 1 then
       widget_index = widget_index + 1
     end
-    param_id = self._param_ids[self.section_index][self.tabs.index][widget_index]
-    params:delta(param_id, delta)
-    return true
+    return self._param_ids[1][1][widget_index]
   end
-  return Pedal.enc(self, n, delta)
+  -- If there's only one widget, always use it
+  if #self._param_ids[section_index][tabs_index] == 1 then
+    return self._param_ids[section_index][tabs_index][1]
+  end
+  local widget_index = enc_index - 1
+  return self._param_ids[section_index][tabs_index][widget_index]
+end
+
+function RingsPedal:enc(n, delta)
+  local param_id = self:_param_id_lookup(self.section_index, self.tabs.index, n)
+  if param_id == nil then
+    return false
+  end
+  params:delta(param_id, delta)
+  return true
 end
 
 function RingsPedal:redraw()
@@ -231,6 +255,7 @@ function RingsPedal:_set_value_from_param_value(param_id, value)
     easteregg_widget.text = self._params_by_id[easteregg_param_id].options[params:get(easteregg_param_id)]
     local tab_index = self.tabs.index
     self:_update_section()
+    self:_arcify_maybe_follow()
     self.tabs.index = tab_index
     self:_update_active_widgets()
     ScreenState.mark_screen_dirty(true)
@@ -255,8 +280,24 @@ function RingsPedal:_set_value_from_param_value(param_id, value)
   end
   if param_id == self.id .. "_follow" then
     self:_update_section()
+    self:_arcify_maybe_follow()
   end
   Pedal._set_value_from_param_value(self, param_id, value)
+end
+
+function RingsPedal:_arcify_maybe_follow()
+  if params:get("arc_mode") ~= 1 then return end
+
+  local arcify = self._arcify
+  if arcify == nil then return end
+
+  local first_param_id = self:_param_id_lookup(1, 1, 2)
+  if first_param_id ~= nil then arcify:map_encoder_via_params(1, first_param_id) end
+  local second_param_id = self:_param_id_lookup(1, 1, 3)
+  if second_param_id ~= nil then arcify:map_encoder_via_params(2, second_param_id) end
+  local third_param_id = self:_param_id_lookup(1, 2, 2)
+  if third_param_id ~= nil then arcify:map_encoder_via_params(3, third_param_id) end
+  arcify:map_encoder_via_params(4, self.id .. "_mix")
 end
 
 return RingsPedal

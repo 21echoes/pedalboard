@@ -125,8 +125,19 @@ function Pedal:add_params()
   self._params_by_id = params_by_id
 end
 
-function Pedal:enter()
-  -- Called when the page is scrolled to
+-- Called when the page is scrolled to
+function Pedal:enter(arcify)
+  if params:get("arc_mode") == 1 then
+    for i=1,3 do
+      if i <= #self._param_ids_flat - 3 then
+        arcify:map_encoder_via_params(i, self._param_ids_flat[i])
+      else
+        arcify:map_encoder_via_params(i, "none")
+      end
+    end
+    arcify:map_encoder_via_params(4, self.id .. "_mix")
+  end
+  -- TODO: consider changing arcification when you switch "horizontal" pages?
 end
 
 function Pedal:is_engine_ready()

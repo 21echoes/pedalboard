@@ -150,10 +150,17 @@ function Board:_add_param_actions()
   end
 end
 
-function Board:enter()
+function Board:enter(arcify)
   -- Called when the page is scrolled to
   self.tabs:set_index(1)
   self:_set_pending_pedal_class_to_match_tab(self.tabs.index)
+
+  -- Arcify encoders control Mix% for each pedal on the board
+  if params:get("arc_mode") == 1 then
+    for i=1,#self.pedals do
+      arcify:map_encoder_via_params(i, self.pedals[i].id .. "_mix")
+    end
+  end
 end
 
 function Board:key(n, z)

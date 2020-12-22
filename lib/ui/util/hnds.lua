@@ -1,4 +1,6 @@
 -- Adapted from hnds v0.4 by @justmat
+local ScreenState = include("lib/ui/util/screen_state")
+
 local tau = math.pi * 2
 
 local options = {
@@ -55,19 +57,34 @@ function lfo.init(num_targets, add_targets)
   for i = 1, lfo.number_of_outputs do
     params:add_group("LFO "..i, 5 + num_targets)
     -- lfo on/off
-    params:add_option(i .. "lfo_enabled", "Enabled", {"off", "on"}, 2)
+    params:add_option(i .. "_lfo_enabled", "Enabled", {"off", "on"}, 2)
+    params:set_action(i .. "_lfo_enabled", function(value)
+      ScreenState.mark_screen_dirty(true)
+    end)
     -- lfo shape
-    params:add_option(i .. "lfo_shape", "Shape", options.lfotypes, 1)
-    params:set_action(i .. "lfo_shape", function(value) lfo[i].waveform = options.lfotypes[value] end)
+    params:add_option(i .. "_lfo_shape", "Shape", options.lfotypes, 1)
+    params:set_action(i .. "_lfo_shape", function(value)
+      lfo[i].waveform = options.lfotypes[value]
+      ScreenState.mark_screen_dirty(true)
+    end)
     -- lfo speed
-    params:add_control(i .. "lfo_freq", "Freq", controlspec.new(0.01, 10.0, "exp", 0.01, 0.01, "Hz"))
-    params:set_action(i .. "lfo_freq", function(value) lfo[i].freq = value end)
+    params:add_control(i .. "_lfo_freq", "Freq", controlspec.new(0.01, 10.0, "exp", 0.01, 0.01, "Hz"))
+    params:set_action(i .. "_lfo_freq", function(value)
+      lfo[i].freq = value
+      ScreenState.mark_screen_dirty(true)
+    end)
     -- lfo depth
-    params:add_number(i .. "lfo_depth", "Depth", 0, 100, 100)
-    params:set_action(i .. "lfo_depth", function(value) lfo[i].depth = value end)
+    params:add_number(i .. "_lfo_depth", "Depth", 0, 100, 100)
+    params:set_action(i .. "_lfo_depth", function(value)
+      lfo[i].depth = value
+      ScreenState.mark_screen_dirty(true)
+    end)
     -- lfo offset
-    params:add_number(i .. "lfo_offset", "Offset", -100, 100, 0)
-    params:set_action(i .. "lfo_offset", function(value) lfo[i].offset = value end)
+    params:add_number(i .. "_lfo_offset", "Offset", -100, 100, 0)
+    params:set_action(i .. "_lfo_offset", function(value)
+      lfo[i].offset = value
+      ScreenState.mark_screen_dirty(true)
+    end)
     add_targets(i)
   end
 
@@ -76,7 +93,7 @@ function lfo.init(num_targets, add_targets)
   lfo_metro.count = -1
   lfo_metro.event = function()
     for i = 1, lfo.number_of_outputs do
-      if params:get(i .. "lfo_enabled") == 2 then
+      if params:get(i .. "_lfo_enabled") == 2 then
         local value
         if lfo[i].waveform == "sine" then
           value = make_sine(i)
@@ -94,6 +111,17 @@ function lfo.init(num_targets, add_targets)
   end
   lfo_metro:start()
   lfo.lfo_metro = lfo_metro
+end
+
+-- TODO: refactor this to share code better with add_params/init
+function lfo.arcify_register(arcify)
+  for i = 1, lfo.number_of_outputs do
+    arcify:register(i .. "_lfo_enabled")
+    arcify:register(i .. "_lfo_shape")
+    arcify:register(i .. "_lfo_freq")
+    arcify:register(i .. "_lfo_depth")
+    arcify:register(i .. "_lfo_offset")
+  end
 end
 
 function lfo.cleanup()

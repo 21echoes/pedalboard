@@ -49,9 +49,13 @@ function _ModMatrix:init(pedal_classes)
 
   params:add_group("Envelope Follower", 3 + num_targets)
   params:add_option("envfol_enabled", "Enabled", {"off", "on"}, 2)
+  params:set_action("envfol_enabled", function(value) ScreenState.mark_screen_dirty(true) end)
   params:add_control("envfol_depth", "Gain", ControlSpec.new(0, 10, "lin", 0.1, 1))
+  params:set_action("envfol_depth", function(value) ScreenState.mark_screen_dirty(true) end)
   params:add_number("envfol_offset", "Offset", -100, 100, 0)
+  params:set_action("envfol_offset", function(value) ScreenState.mark_screen_dirty(true) end)
   params:add_number("envfol_smoothing", "Smoothing", 0, 10, 4)
+  params:set_action("envfol_smoothing", function(value) ScreenState.mark_screen_dirty(true) end)
   self:_add_mod_targets(self.lfos.number_of_outputs + 1)
 
   self.amp_poll_l = poll.set("amp_in_l")
@@ -66,6 +70,25 @@ function _ModMatrix:init(pedal_classes)
   end
   self.amp_poll_r.time = 0.02
   self.amp_poll_r:start()
+end
+
+-- TODO: refactor this to share code better with add_params/init
+function _ModMatrix:arcify_register(arcify)
+  self.lfos.arcify_register(arcify)
+  arcify:register("envfol_enabled")
+  arcify:register("envfol_depth")
+  arcify:register("envfol_offset")
+  arcify:register("envfol_smoothing")
+  for lfo_index = 1, self.lfos.number_of_outputs + 1 do
+    for pedal_index, pedal in ipairs(self.pedal_classes) do
+      for i, param_id in ipairs(pedal._param_ids_flat) do
+        local param = pedal._params_by_id[param_id]
+        if self.is_targetable(param) then
+          arcify:register(self.param_id(param_id, lfo_index))
+        end
+      end
+    end
+  end
 end
 
 local param_block_list = {
@@ -156,7 +179,7 @@ function _ModMatrix:mod(param, value)
 
   for i = 1, self.lfos.number_of_outputs do
     -- Check the LFO is enabled
-    if params:get(i .. "lfo_enabled") == 2 then
+    if params:get(i .. "_lfo_enabled") == 2 then
       -- Get the LFO value scaled by the modmatrix
       local modmatrix_value = self.lfos[i].value * params:get(self.param_id(param.id, i)) * 0.01
       raw_value = raw_value + modmatrix_value

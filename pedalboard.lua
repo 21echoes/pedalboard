@@ -99,9 +99,8 @@ function init()
     ModMatrix:new(),
   }
   pages = UI.Pages.new(1, #pages_table)
-  _arcify_maybe_follow()
 
-  -- Set the encoder sensitivities
+  pages_table[1]:enter(arcify)
   _set_encoder_sensitivities()
 
   -- Render loop
@@ -122,9 +121,8 @@ function enc(n, delta)
   if n == 1 then
     -- E1 changes page
     pages:set_index_delta(util.clamp(delta, -1, 1), false)
+    if current_page() then current_page():enter(arcify) end
     _set_encoder_sensitivities()
-    if current_page() then current_page():enter() end
-    _arcify_maybe_follow()
     ScreenState.mark_screen_dirty(true)
   else
     -- Other encoders are routed to the current page's class
@@ -181,8 +179,7 @@ end
 
 function set_page_index(new_page_index)
   pages:set_index(new_page_index)
-  if current_page() then current_page():enter() end
-  _arcify_maybe_follow()
+  if current_page() then current_page():enter(arcify) end
   _set_encoder_sensitivities()
   ScreenState.mark_screen_dirty(true)
 end
@@ -193,7 +190,6 @@ function add_page(page_instance)
   table.insert(pages_table, index, page_instance)
   modmatrix_page():add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
-  _arcify_maybe_follow()
   ScreenState.mark_screen_dirty(true)
 end
 
@@ -201,7 +197,6 @@ function insert_page_at_index(index, page_instance)
   table.insert(pages_table, index, page_instance)
   modmatrix_page():add_pedal(page_instance, index - 1)
   pages = UI.Pages.new(1, #pages_table)
-  _arcify_maybe_follow()
   ScreenState.mark_screen_dirty(true)
 end
 
@@ -213,7 +208,6 @@ function remove_page(index, cleanup)
   end
   modmatrix_page():remove_pedal(index - 1)
   pages = UI.Pages.new(1, #pages_table)
-  _arcify_maybe_follow()
   ScreenState.mark_screen_dirty(true)
 end
 
@@ -223,7 +217,6 @@ function swap_page(index, page_instance)
   modmatrix_page():remove_pedal(index - 1)
   modmatrix_page():add_pedal(page_instance, index - 1)
   old_pedal:cleanup()
-  _arcify_maybe_follow()
   ScreenState.mark_screen_dirty(true)
 end
 
@@ -249,39 +242,8 @@ function setup_arcify()
       arcify:register(param_id)
     end
   end
-  -- TODO: register the modmatrix params too
+  ModMatrix:arcify_register(arcify)
   arcify:add_params()
-end
-
-function _arcify_maybe_follow()
-  -- Fixed mode doesn't follow
-  if params:get("arc_mode") == 2 then return end
-
-  -- TODO: arcify the modmatrix page
-  if pages.index == #pages_table then return end
-
-  if pages.index == 1 then
-    for i=1,4 do
-      local pages_index = i + 1
-      if pages_index < #pages_table then
-        arcify:map_encoder_via_params(i, pages_table[pages_index].id .. "_mix")
-      else
-        arcify:map_encoder_via_params(i, "none")
-      end
-    end
-    return
-  end
-
-  page = current_page()
-  if page == nil then return end
-  for i=1,3 do
-    if i <= #page._param_ids_flat - 3 then
-      arcify:map_encoder_via_params(i, page._param_ids_flat[i])
-    else
-      arcify:map_encoder_via_params(i, "none")
-    end
-  end
-  arcify:map_encoder_via_params(4, page.id .. "_mix")
 end
 
 -- TODO: how do we manage upgrading MiUgens versions?

@@ -30,6 +30,7 @@ function RingModulator:new(bypass_by_default)
   i._param_id_to_widget[i.id .. "_interval"]:set_marker_position(1, 0)
   i._param_id_to_widget[i.id .. "_interval"].start_value = 0
   i._param_id_to_widget[i.id .. "_tone"]:set_marker_position(1, 75)
+  i._arcify = nil
 
   return i
 end
@@ -79,6 +80,17 @@ function RingModulator.params()
     {{interval_control, pitch_control, follow_control}, {shape_control, tone_control}},
     Pedal._default_params(id_prefix),
   }
+end
+
+function RingModulator:enter(arcify)
+  Pedal.enter(self, arcify)
+  self._arcify = arcify
+  self:_arcify_maybe_follow()
+end
+
+function RingModulator:cleanup()
+  Pedal.cleanup(self)
+  self._arcify = nil
 end
 
 function RingModulator:_position_for_widget(section_index, tab_index, widget_index, widget_type)
@@ -144,6 +156,7 @@ end
 function RingModulator:_set_value_from_param_value(param_id, value)
   if param_id == self.id .. "_follow" then
     self:_update_section()
+    self:_arcify_maybe_follow()
   elseif param_id == self.id .. "_pitch" then
     local pitch_widget = self._param_id_to_widget[param_id]
     pitch_widget:set_value(value)
@@ -180,6 +193,28 @@ function RingModulator:_update_section()
     end
   end
   Pedal._update_section(self)
+end
+
+function RingModulator:_arcify_maybe_follow()
+  if params:get("arc_mode") ~= 1 then return end
+
+  local arcify = self._arcify
+  if arcify == nil then return end
+
+  local showing_pitch = params:get(self.id .. "_follow") == 1
+  if showing_pitch then
+    arcify:map_encoder_via_params(1, self.id .. "_pitch")
+  else
+    arcify:map_encoder_via_params(1, self.id .. "_interval")
+  end
+  for i=2,3 do
+    if (i + 1) <= #self._param_ids_flat - 3 then
+      arcify:map_encoder_via_params(i, self._param_ids_flat[(i + 1)])
+    else
+      arcify:map_encoder_via_params(i, "none")
+    end
+  end
+  arcify:map_encoder_via_params(4, self.id .. "_mix")
 end
 
 return RingModulator
