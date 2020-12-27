@@ -157,8 +157,12 @@ function Board:enter(arcify)
 
   -- Arcify encoders control Mix% for each pedal on the board
   if params:get("arc_mode") == 1 then
-    for i=1,#self.pedals do
-      arcify:map_encoder_via_params(i, self.pedals[i].id .. "_mix")
+    for i=1,4 do
+      if i <= #self.pedals do
+        arcify:map_encoder_via_params(i, self.pedals[i].id .. "_mix")
+      else
+        arcify:map_encoder_via_params(i, "none")
+      end
     end
   end
 end
