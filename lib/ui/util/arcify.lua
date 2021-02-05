@@ -6,6 +6,8 @@
 -- @author Mimetaur (https://github.com/mimetaur)
 -- Modifications by @21echoes
 
+local tabutil = require "tabutil"
+
 local Arcify = {}
 Arcify.__index = Arcify
 
