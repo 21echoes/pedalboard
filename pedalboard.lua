@@ -40,7 +40,7 @@
 -- are controled by which enc
 --
 --
--- v2.2.0 @21echoes
+-- v2.2.1 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
