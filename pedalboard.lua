@@ -36,11 +36,17 @@
 -- is currently focused.
 -- "Fixed" mode:
 -- Use the params page
--- to choose which params
--- are controled by which enc
+--  to choose which params
+--  are controlled by which enc
+--
+-- Crow (optional)
+-- Use the params page
+--  to choose which params
+--  are controlled
+--  by which crow input
 --
 --
--- v2.2.2 @21echoes
+-- v2.3.0 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"

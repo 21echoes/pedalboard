@@ -76,13 +76,16 @@ A simple collection of chainable effects for the Norns sound computer.
 * "Fixed" mode
   * Use the params page to choose which params are controled by which arc encoder
 
+### Crow (optional)
+* Use the params page to choose which params are controled by which crow input
+
 ## Requirements
 * norns (200328 or later)
 * Audio in (stereo preferred, mono mode available in params)
 * Reset after installs or updates (this is a new Engine)
 
 ## Roadmap
-Film a brief demo video showing how it works
+* Film a brief demo video showing how it works
 
 ### More Pedals!
 * Freezer/Looper
