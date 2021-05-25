@@ -49,6 +49,7 @@ local Board = include("lib/ui/board")
 local ModMatrix = include("lib/ui/modmatrix")
 local ScreenState = include("lib/ui/util/screen_state")
 local Arcify = include("lib/ui/util/arcify")
+local Crowify = include("lib/ui/util/crowify")
 
 -- Pages UI management
 local pages
@@ -65,6 +66,8 @@ local initital_compressor_onoff
 
 -- Arc control of parameters
 local arcify = nil
+-- Crow control of parameters
+local crowify = nil
 
 function init()
   -- Setup our overall rendering style
@@ -80,6 +83,7 @@ function init()
   Board:add_params()
   ModMatrix:add_params(Board.pedal_classes)
   setup_arcify()
+  setup_crowify()
   params:bang()
 
   -- Turn off the built-in monitoring, reverb, etc.
@@ -247,6 +251,18 @@ function setup_arcify()
   end
   ModMatrix:arcify_register(arcify)
   arcify:add_params()
+end
+
+function setup_crowify()
+  -- Crowify adds its own group
+  crowify = Crowify.new()
+  for pedal_index, pedal in ipairs(Board.pedal_classes) do
+    for i, param_id in ipairs(pedal._param_ids_flat) do
+      crowify:register(param_id)
+    end
+  end
+  ModMatrix:crowify_register(crowify)
+  crowify:add_params()
 end
 
 -- TODO: how do we manage upgrading MiUgens versions?

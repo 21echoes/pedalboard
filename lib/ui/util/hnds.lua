@@ -124,6 +124,17 @@ function lfo.arcify_register(arcify)
   end
 end
 
+-- TODO: refactor this to share code better with add_params/init
+function lfo.crowify_register(crowify)
+  for i = 1, lfo.number_of_outputs do
+    crowify:register(i .. "_lfo_enabled")
+    crowify:register(i .. "_lfo_shape")
+    crowify:register(i .. "_lfo_freq")
+    crowify:register(i .. "_lfo_depth")
+    crowify:register(i .. "_lfo_offset")
+  end
+end
+
 function lfo.cleanup()
   if lfo.lfo_metro ~= nil then
     lfo.lfo_metro:stop()

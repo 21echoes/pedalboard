@@ -91,6 +91,25 @@ function _ModMatrix:arcify_register(arcify)
   end
 end
 
+-- TODO: refactor this to share code better with add_params/init
+function _ModMatrix:crowify_register(crowify)
+  self.lfos.crowify_register(crowify)
+  crowify:register("envfol_enabled")
+  crowify:register("envfol_depth")
+  crowify:register("envfol_offset")
+  crowify:register("envfol_smoothing")
+  for lfo_index = 1, self.lfos.number_of_outputs + 1 do
+    for pedal_index, pedal in ipairs(self.pedal_classes) do
+      for i, param_id in ipairs(pedal._param_ids_flat) do
+        local param = pedal._params_by_id[param_id]
+        if self.is_targetable(param) then
+          crowify:register(self.param_id(param_id, lfo_index))
+        end
+      end
+    end
+  end
+end
+
 local param_block_list = {
   "delay_bpm",
   "delay_beat_division",

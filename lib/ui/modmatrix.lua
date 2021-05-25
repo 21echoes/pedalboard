@@ -39,6 +39,15 @@ function ModMatrix:arcify_register(arcify)
   mm:arcify_register(arcify)
 end
 
+-- TODO: refactor this to share code better with add_params/init
+function ModMatrix:crowify_register(crowify)
+  local mm = self.modmatrix
+  if mm == nil then
+    mm = ModMatrixUtil:new()
+  end
+  mm:crowify_register(crowify)
+end
+
 -- Called when the page is scrolled to
 function ModMatrix:enter(arcify)
   self._arcify = arcify
