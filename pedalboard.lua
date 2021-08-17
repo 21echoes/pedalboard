@@ -157,7 +157,7 @@ function redraw()
   screen.clear()
 
   -- Redraw both our content and the current page's content
-  pages:redraw()
+  if pages then pages:redraw() end
   if current_page() then current_page():redraw() end
 
   screen.update()

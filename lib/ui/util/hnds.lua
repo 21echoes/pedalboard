@@ -93,7 +93,9 @@ function lfo.init(num_targets, add_targets)
   lfo_metro.count = -1
   lfo_metro.event = function()
     for i = 1, lfo.number_of_outputs do
-      if params:get(i .. "_lfo_enabled") == 2 then
+      local param_name = i .. "_lfo_enabled"
+      local raw_param = params:lookup_param(param_name)
+      if raw_param and raw_param:get() == 2 then
         local value
         if lfo[i].waveform == "sine" then
           value = make_sine(i)

@@ -117,14 +117,18 @@ local function redraw_ring(self, num, e)
     if e then
         if e.name and e.min and e.max then
             local intensity = e.intensity or DEFAULT_INTENSITY
-            if e.is_control then
-                local value = e.controlspec:unmap(params:get(e.name))
-                local param_led = util.linlin(0, 1, control_start_angle, control_end_angle, value)
-                self.a_:segment(num, control_start_angle, param_led, intensity)
-            else
-                local value = params:get(e.name)
-                local param_led = util.linlin(e.min, e.max, start_angle, end_angle, value)
-                self.a_:segment(num, start_angle, param_led, intensity)
+            local raw_param = params:lookup_param(e.name)
+            if raw_param then
+                local raw_value = raw_param:get()
+                if e.is_control then
+                    local value = e.controlspec:unmap(raw_value)
+                    local param_led = util.linlin(0, 1, control_start_angle, control_end_angle, value)
+                    self.a_:segment(num, control_start_angle, param_led, intensity)
+                else
+                    local value = raw_value
+                    local param_led = util.linlin(e.min, e.max, start_angle, end_angle, value)
+                    self.a_:segment(num, start_angle, param_led, intensity)
+                end
             end
         end
     end
