@@ -46,7 +46,7 @@
 --  by which crow input
 --
 --
--- v2.3.0 @21echoes
+-- v2.3.1 @21echoes
 
 engine.name = "Pedalboard"
 local UI = require "ui"
