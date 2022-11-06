@@ -9,7 +9,8 @@ DelayPedal : Pedal {
     var numChannels, minDelay, maxDelay, delayBuffers, feedbackBuses, time, changeDetector, feedback, mode;
     numChannels = 2;
     minDelay = 0.03;
-    maxDelay = 5;
+    // 40 bpm whole note = 6 seconds
+    maxDelay = 6;
     delayBuffers = Array.fill(numChannels, {Buffer.alloc(context.server, pow(2, (maxDelay * 48000).log2.ceil) + 1, 1)});
     feedbackBuses = Array.fill(numChannels, {Bus.audio(context.server, 1)});
     // The feedback loop introduces an additional ControlRate.ir.reciprocal delay,

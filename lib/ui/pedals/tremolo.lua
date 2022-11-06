@@ -22,6 +22,8 @@ function TremoloPedal:new(bypass_by_default)
 
   i.sections = {
     {"Rate", "Depth & Shape"},
+    -- TODO: bias, symmetry
+    {"Stereo Phase"},
     i:_default_section(),
   }
   i._tap_tempo = TapTempo.new()
@@ -29,6 +31,7 @@ function TremoloPedal:new(bypass_by_default)
   i._param_id_to_widget[i.id .. "_bpm"].units = "bpm"
   i._param_id_to_widget[i.id .. "_shape"]:set_marker_position(1, 33)
   i._param_id_to_widget[i.id .. "_shape"]:set_marker_position(2, 67)
+  i._param_id_to_widget[i.id .. "_stereo_phase"].units = "°"
 
   return i
 end
@@ -65,6 +68,12 @@ function TremoloPedal.params()
     type = "control",
     controlspec = Controlspecs.MIX,
   }
+  local stereo_phase_control = {
+    id = id_prefix .. "_stereo_phase",
+    name = "Stereo Phase",
+    type = "control",
+    controlspec = ControlSpec.new(0, 360, "lin", 1, 0, "°"),
+  }
 
   -- Default mix of 100%
   local default_params = Pedal._default_params(id_prefix)
@@ -72,6 +81,7 @@ function TremoloPedal.params()
 
   return {
     {{bpm_control, beat_division_control}, {depth_control, shape_control}},
+    {{stereo_phase_control}},
     default_params
   }
 end
