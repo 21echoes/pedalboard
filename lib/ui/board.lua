@@ -671,7 +671,14 @@ function Board:_set_pedal_by_index(slot, name_index)
   local page_index = slot + 1
 
   if pedal_class_index == 0 then
-    -- This option means we are removing the pedal in this slot
+    -- "pedal_class_index == 0" means we are removing the pedal in this slot
+
+    if slot > #self.pedals then
+      -- We can't remove pedals which don't exist
+      -- (this can happen if params:bang() is called and some slots are empty in the params)
+      return
+    end
+
     local engine_index = slot - 1 -- The engine is zero-indexed
     engine.remove_pedal_at_index(engine_index, 0)
     table.remove(self.pedals, slot)
@@ -681,6 +688,7 @@ function Board:_set_pedal_by_index(slot, name_index)
     self._remove_page(page_index, true)
     return
   end
+
   pedal_class = pedal_classes[pedal_class_index]
   -- If this slot index is beyond our existing pedals, it adds a new pedal
   if slot > #self.pedals then
