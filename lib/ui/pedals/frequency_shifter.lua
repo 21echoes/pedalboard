@@ -24,9 +24,12 @@ function FrequencyShifterPedal:new(bypass_by_default)
   }
   i:_complete_initialization()
   i._param_id_to_widget[i.id .. "_freq"]:set_marker_position(1, 0)
+  i._param_id_to_widget[i.id .. "_freq"].units = "hz"
   i._param_id_to_widget[i.id .. "_freq"].start_value = 0
   i._param_id_to_widget[i.id .. "_freq_fine"]:set_marker_position(1, 0)
+  i._param_id_to_widget[i.id .. "_freq_fine"].units = "hz"
   i._param_id_to_widget[i.id .. "_freq_fine"].start_value = 0
+  i._param_id_to_widget[i.id .. "_phase"].units = "pi"
 
   return i
 end
@@ -42,13 +45,13 @@ function FrequencyShifterPedal.params()
     id = id_prefix .. "_freq",
     name = "Freq Coarse",
     type = "control",
-    controlspec = ControlSpec.new(-333, 333, "lin", 1, 0, "Hz")
+    controlspec = ControlSpec.new(-1000, 1000, "lin", 1, 0, "Hz")
   }
   local freq_control_fine = {
     id = id_prefix .. "_freq_fine",
     name = "Freq Fine",
     type = "control",
-    controlspec = ControlSpec.new(-7, 7, "lin", 0.001, 0, "Hz") -- range is circa a 1/100th of _freq's range.
+    controlspec = ControlSpec.new(-20, 20, "lin", 0.001, 0, "Hz") -- range is circa a 1/100th of _freq's range.
   }
   local phase_control = {
     id = id_prefix .. "_phase",
