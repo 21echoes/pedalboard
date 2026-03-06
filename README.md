@@ -16,6 +16,7 @@ A simple collection of chainable effects for the Norns sound computer.
 * Wavefolder
 * Ring Modulator
 * Pitch Shifter
+* Frequency Shifter
 * Sub Boost
 * Vibrato
 * Auto-Wah
